@@ -95,9 +95,9 @@ names of the form '<user>-<random int>' we can define a generator as
 following:
 
 <pre><core>
-  var r = random().int(),
-      u = chain(r, function(i) { return append('-' + i); });
-      u('admin'); // Will return for example 'admin-385' or 'admin-712', etc.
+	var r = random().int(),
+	    u = chain(r, function(i) { return append('-' + i); });
+	    u('admin'); // Will return for example 'admin-385' or 'admin-712', etc.
 </core></pre>
 
 `chain()` takes a generator and a function as argument. It executes the 
@@ -146,7 +146,7 @@ the generator to the `RandomLib` class defined in Core:
 	};
 </code></pre>
 
-and use as <code>random().myRandGenerator()<code>.
+and use as `random().myRandGenerator()`.
 Most modules extend the random object with custom generator.
 See Common.alpha or Network.emailAddress for more details.
 
@@ -158,8 +158,7 @@ takes an array as argument and returns the dictionary object.
 Currently two generator functions are provided by the dictionary 
 object:
 
-  - `list()` - a range function which returns all or a subset 
-               of elements and
+  - `list()` - a range function which returns all or a subset of elements and
   - `element()` - picks a random dictionary element.
 
 Popcorn comes with several default dictionaries for most common
