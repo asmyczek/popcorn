@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title>Popcorn maker</title>
+
+		<style type="text/css">
+			table.out { 
+				background-color: #fafafa;
+				border: 1px #888888 solid;
+				border-collapse: collapse;
+				border-spacing: 0px;
+			}
+
+			table.out th { 
+				border: 1px #888888 solid;
+				background-color: #eaeaea;
+				padding:1px 5px;
+			}
+
+			table.out td { 
+				border: 1px #888888 solid;
+				padding:1px 5px;
+			}
+
+			td.idx { 
+				color: #777777;
+				text-align: right;
+			}
+			
+		</style>
+
+		<script type="text/javascript" src="./lib/jquery-1.3.2.min.js"></script>
+		<script type="text/javascript" src="./src/core.js"></script>
+		<script type="text/javascript" src="./src/common.js"></script>
+		<script type="text/javascript" src="./src/dictionary.js"></script>
+		<script type="text/javascript" src="./src/passwords.js"></script>
+		<script type="text/javascript" src="./src/names.js"></script>
+		<script type="text/javascript" src="./src/network.js"></script>
+		<script type="text/javascript" src="./src/all.js"></script>
+		<script type="text/javascript">
+
+			$(document).ready(function() {
+				var select = $('#examples');
+				$.each(examples, function(index, e) {
+					select.append('<option>' + e.title + '</option>');
+				});
+				select.change(function() {
+					var index = select.attr('selectedIndex');
+					if (index > 0) {
+						$('#input').val(examples[index-1].input);
+					}
+				});
+			});
+	
+			var examples = [
+				{ title 	  : "The first generator",
+				input		  : "var account = {\n" +
+								"  id : 1,\n" +
+								"  name : 'Woody',\n" +
+								"  passowrd : 'Rex'\n" +
+								"};\n\n" +
+								"var generator = {\n" +
+								"  id : range(5,10),\n" +
+								"  name : list('Buzz', 'Slinky')\n" +
+								"};\n\n" +
+								"var results = generate(generator, account);\n" }
+
+			];
+
+			var run_generator = function(input) {
+				var output  = $('#output'),
+					rc		= $('#result_count'),
+					error  	= $('#error');
+
+				// clear output
+				output.empty();
+				rc.text("");
+				error.text("");
+
+				// validate input
+				//try {
+          with(Popcorn.All) {
+            eval(input);
+          }
+				//} catch(e) {
+			//		error.text(e.toString());
+			//		return;
+				//}
+
+				if (results === undefined) {
+					error.text("Missing 'results = generate(...)' call!");
+					return;
+				}
+
+				// Print result
+				rc.text(results.length + ' result(s): ');
+
+				// Build result table
+				if (results.length > 0) {
+					var out = '<table class="out"><thead><tr><th>#</th>';
+          var th = "";
+          var names = [];
+					for (var name in results[0]) {
+						names.push(name);
+					}
+          names = names.sort().reverse();
+					for (var i = 0, l = names.length; i < l; i++) {
+						th = '<th>' + names[i] + '</th>' + th; 
+					}
+					out += th + '</tr></thead><tbody>';
+					for (i = 0, l = results.length; i < l; i++) {
+						out += '<tr><td class="idx">' + (i + 1) + '</td>';
+            var td = "";
+            for (var j = 0, jl = names.length; j < jl; j++) {
+              td = '<td>' + results[i][names[j]] + '</td>' + td;
+            }
+						out += td + '</tr>';
+					}
+					out += '</tbody></table>';
+					output.append(out);
+				}
+			};
+		</script>
+	</head>
+
+	<body>
+        <h3>Popcorn maker</h3>
+
+		<table cellpadding="10">
+			<tr>
+				<td valign="top">
+<div>
+	Select a popcorn bucket:
+		<select id="examples">
+			<option>choose one</option>
+		</select>
+</div>
+<div>
+	or make a new one:
+</div>
+<textarea id="input" rows="25" cols="70">
+var account = { 
+};
+
+var generator = {
+};
+
+var results = generate(generator, account);
+</textarea>
+
+					<div><a href="javascript:;" onclick="run_generator($('#input').val())">Generate objects</a></div>
+					<div id="error" style="color:red;"></div>
+				</td>
+
+				<td valign="top">
+					<div id="result_count" style="color:green;"></div>
+					<div id="output">
+					</div>
+				</td>
+			</tr>
+		</table>
+
+	</body>
+</html>
+
+

@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title>Popcorn.Core - Unit tests</title>
+    <link rel="stylesheet" href="test.css">
+		<script type="text/javascript" src="../src/core.js"></script>
+		<script type="text/javascript" src="test.js"></script>
+	</head>
+	<body>
+		<h3>Popcorn.Core - unit tests</h3>
+
+		<p>
+		<div><b>Core lib</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+            assertGen(Popcorn.Core.gen("abc"), null, "abc", "gen()");
+            assertGen(chain(gen("a"), function(a) { return gen(a + "bc"); }), null, "abc", "chain()");
+            assertGen(seq([gen("a"), gen("b")], concat), null, ["a", "b"], "seq(concat)");
+            assertGen(seq([gen("a"), gen("b")], join), null, "ab", "seq(join)");
+            assertGen(replicate(gen("a"), join)(3), null, "aaa", "replicate(join)");
+            assert(['a','a','a'], repeat(3, 'a'), "repeat()");
+          }
+		</script>
+		</p>
+
+		<p>
+		<div><b>Object generators</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+            var d     = { name : "John", age : 35 };
+                name  = property("name"),
+                age   = property("age"),
+                mike  = name(gen("Mike")),
+                john  = name(gen("John")),
+                age40 = age(gen(40));
+            assertGen(mike, d, { name : "Mike" }, "property()");
+            assertGen(update([mike, age40]), d, { name : "Mike", age : 40 }, "update()");
+            assertGen(mutate("name", [gen("Mike"), gen("John")]), d, 
+                [{ name : "Mike" }, { name : "John" }], 
+                "mutate()");
+
+            var g = { name : mike, age : age40 };
+            assert(generate(g, d), 
+                [{ name : "Mike", age : 40}], "generate()");
+          }
+		</script>
+		</p>
+
+		<p>
+		<div><b>Random generators</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+            var rand = random(12345);
+            var seedTest = [rand.int()(), rand.int()(), rand.int()()];
+            assertGen(repeat(3, random(12345).int()), null, seedTest, "random(seed)");
+            assertGen(rand.int(1,5), null, function(r) { return (r >= 1) && (r <= 5); }, "int()");
+            assertGen(rand.int(1,1), null, 1, "int(1,1)");
+            assertGen(random().int(1,1), null, 1, "random().int()");
+            assertGen(rand.element(['a']), null, 'a', "elemetn(one element)");
+            assertGen(rand.element(['a', 'b', 'c']), null, function(r) { return "abc".indexOf(r) >= 0; }, "elemetn(array)");
+          }
+		</script>
+		</p>
+
+		<p>
+		<div><b>Utils lib</b></div>
+      <script type="text/javascript">
+          with(Popcorn.Core) {
+            assertTrue(isNull(null), "isNull(null)");
+            assertFalse(isNull(undefined), "not isNull(undefined)");
+            assertTrue(isUndefined(undefined), "isUndefined(undefined)");
+            assertFalse(isUndefined(null), "not isUndefined(null)");
+            assertTrue(isFunction(function() { return ""; }), "isFunction()");
+            assertTrue(isDate(new Date()), "isDate(now)");
+            assertFalse(isDate("Sep 13, 2009"), "isDate(date string)");
+            assertFalse(isDate(123456), "isDate(numb)");
+            assertTrue(isObject({}), "isObject({})");
+            assertFalse(isObject(function() { return ""; }), "not isFunction(<function>)");
+            assertTrue(isInt(2), "isInt(2)");
+            assertFalse(isInt(2.1), "isInt(2.1)");
+
+            // test map()
+              var plus1 = function(x) { return x + 1; };
+            assert([2,3,4], map(plus1, [1,2,3]), "map()");
+
+            // test merge()
+            var o1 = { p1 : 'o1' },
+                o2 = { p2 : 'o2' },
+                o  = merge(o1, o2);
+            assertGen(gen(o), null, function(r) { return (r.p1 === "o1") && (r.p2 === "o2"); }, "merge()");
+          }
+		</script>
+		</p>
+
+	</body>
+</html>
+

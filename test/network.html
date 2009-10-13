@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title>Popcorn.Network - Unit tests</title>
+    <link rel="stylesheet" href="test.css">
+		<script type="text/javascript" src="../src/core.js"></script>
+		<script type="text/javascript" src="../src/dictionary.js"></script>
+		<script type="text/javascript" src="../src/names.js"></script>
+		<script type="text/javascript" src="../src/network.js"></script>
+		<script type="text/javascript" src="test.js"></script>
+	</head>
+	<body>
+		<h3>Popcorn.Network - unit tests</h3>
+
+		<p>
+		<div><b>Network lib</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+          with(Popcorn.Names) {
+          with(Popcorn.Network) {
+            var rand = random(12345);
+            assertGen(domains.element(rand), null, "sr", "domains.element()");
+            assertGen(ipRange("192.168.2.254", "192.168.3.2"), null,
+                ["192.168.2.254", "192.168.2.255", "192.168.3.0", "192.168.3.1", "192.168.3.2"],
+                "ipRange(from, to)");
+            assertGen(commonDomains.list(2), null, ["com", "net"], "commonDomains()");
+          }}}
+		</script>
+		</p>
+
+		<p>
+		<div><b>Random generator extensions</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+          with(Popcorn.Network) {
+            var rand = random(12345);
+            assertGen(rand.ipAddress("192.168.1.10", "192.168.2.255"), null, "192.168.2.168", "ipAddress()");
+            assertGen(rand.macAddress(), null, "00:5A:8A:A6:01:49", "macAddress()");
+            assertGen(rand.macAddress('-'), null, "00-30-F0-82-39-00", "macAddress('-')");
+            assertGen(rand.emailAddress(), null, "Adrian.McBride@Ralston.ug", "emailAddress()");
+          }}
+		</script>
+		</p>
+
+	</body>
+</html>
+

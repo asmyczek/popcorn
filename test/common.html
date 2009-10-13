@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title>Popcorn.Common - Unit tests</title>
+    <link rel="stylesheet" href="test.css">
+		<script type="text/javascript" src="../src/core.js"></script>
+		<script type="text/javascript" src="../src/common.js"></script>
+		<script type="text/javascript" src="test.js"></script>
+	</head>
+	<body>
+		<h3>Popcorn.Common - unit tests</h3>
+
+		<p>
+		<div><b>Common lib</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+          with(Popcorn.Common) {
+            var dnow = new Date();
+            assertGen(range(1,5), null, [1,2,3,4,5], "range()");
+            assertGen(list('a','b','c'), null, ['a','b','c'], "list()");
+            assertGen(date(dnow, "date"), null, function(r) { return r === dnow.getDate(); }, "date(date)");
+            assertGen(date('Sep 13, 2009', "date"), null, function(r) { return r === 13; }, "date(string)");
+            assertGen(now("date"), null, function(r) { return r === dnow.getDate(); }, "now(date)");
+            assertGen(prepend("unit-"), "test", "unit-test", "prepend(string)");
+            assertGen(prepend(gen("unit-")), "test", "unit-test", "prepend(generator)");
+            assertGen(prepend([gen("unit1-"), gen("unit2-")]), "test", ["unit1-test", "unit2-test"], "prepend(array)");
+            assertGen(append("-test"), "unit", "unit-test", "append(string)");
+            assertGen(append(gen("-test")), "unit", "unit-test", "append(generator)");
+            assertGen(append([gen("-test1"), gen("-test2")]), "unit", ["unit-test1", "unit-test2"], "append(array)");
+          }}
+		</script>
+		</p>
+
+		<p>
+		<div><b>Random generator extensions</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+          with(Popcorn.Common) {
+            var rand = random(12345);
+            function isAlpha(s)    { return !(/[^a-zA-Z]/g).test(s); };
+            function isAlphaNum(s) { return !(/[^a-zA-Z0-9]/g).test(s); };
+            assertGen(rand.alpha(10,20), null, function(r) { return (r.length >= 10) && (r.length <= 20); }, "alpha(length)");
+            assertGen(rand.alpha(90,100), null, function(r) { return isAlpha(r); }, "alpha()");
+            assertGen(rand.alphaNum(90,100), null, function(r) { return isAlphaNum(r); }, "alphaNum()");
+            assertGen(rand.alphaNum(90,100), null, function(r) { return !isAlpha(r); }, "not alphaNum()");
+          }}
+		</script>
+		</p>
+
+	</body>
+</html>
+

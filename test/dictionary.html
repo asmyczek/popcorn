@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<title>Popcorn.Dictionary - Unit tests</title>
+    <link rel="stylesheet" href="test.css">
+		<script type="text/javascript" src="../src/core.js"></script>
+		<script type="text/javascript" src="../src/dictionary.js"></script>
+		<script type="text/javascript" src="../src/names.js"></script>
+		<script type="text/javascript" src="../src/passwords.js"></script>
+		<script type="text/javascript" src="test.js"></script>
+	</head>
+	<body>
+		<h3>Popcorn.Dictionary - unit tests</h3>
+
+		<p>
+		<div><b>Dictionary lib</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+          with(Popcorn.Dictionary) {
+            var dict = dictionary(['test1', 'test2']),
+                rand = random(12345);
+            assertGen(dict.element(), null, function(r) { return (r === "test1") || (r === "test2"); }, "dictionary.element()");
+            assertGen(dict.element(rand), null, "test2", "dictionary.element(rand)");
+            assertGen(dict.list(), null, ["test1", "test2"], "dictionary.list()");
+            assertGen(dict.list(5), null, ["test1", "test2", "test1", "test2", "test1"], "dictionary.list(n>length)");
+            assertGen(dict.list(1,5), null, ["test2", "test1", "test2", "test1"], "dictionary.list(x,y)");
+
+            // lorem ipsum
+            assertGen(loremIpsum(6), null, "Lorem ipsum dolor sit amet, consectetur", "loremIpsum(n)");
+          }}
+		</script>
+		</p>
+
+		<p>
+		<div><b>Names lib</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+          with(Popcorn.Dictionary) {
+          with(Popcorn.Names) {
+            assertGen(names.list(5), null, ["Aimee", "Aleksandra", "Alice", "Alicia", "Allison"], "names.list(n)");
+            assertGen(names.element(), null, function(r) { return r.length > 0; }, "names.element()");
+            assertGen(surnames.list(5), null, ["Adams", "Adamson", "Adler", "Akers", "Akin"], "surnames.list(n)");
+            assertGen(surnames.element(), null, function(r) { return r.length > 0; }, "surnames.element()");
+          }}}
+		</script>
+		</p>
+
+		<p>
+		<div><b>Passwords lib</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+          with(Popcorn.Dictionary) {
+          with(Popcorn.Passwords) {
+            assertGen(passwords.list(5), null, ['123456 ', 'porsche ', 'firebird ', 'prince ', 'rosebud'], "passwords.list(n)");
+            assertGen(passwords.element(), null, function(r) { return r.length > 0; }, "passwords.element()");
+
+            // lorem ipsum
+            assertGen(loremIpsum(6), null, "Lorem ipsum dolor sit amet, consectetur", "loremIpsum(n)");
+          }}}
+		</script>
+		</p>
+
+	</body>
+</html>
+

@@ -1,0 +1,8 @@
+span.ok { 
+  color: green; 
+}
+
+span.error { 
+  color: red; 
+  font-weight: bolder;
+}
