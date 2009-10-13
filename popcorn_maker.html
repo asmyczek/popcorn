@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 	<head>
-		<title>Popcorn maker</title>
+		<title>Popcorn Maker</title>
 
 		<style type="text/css">
 			table.out { 
@@ -53,18 +53,65 @@
 			});
 	
 			var examples = [
-				{ title 	  : "The first generator",
-				input		  : "var account = {\n" +
-								"  id : 1,\n" +
+				{ title 	  : "First generator",
+				  input		  : "var toy = {\n" +
 								"  name : 'Woody',\n" +
-								"  passowrd : 'Rex'\n" +
-								"};\n\n" +
+								"  rank : 1,\n" +
+								"  type : 'cowboy'\n" +
+								" };\n\n" +
 								"var generator = {\n" +
-								"  id : range(5,10),\n" +
-								"  name : list('Buzz', 'Slinky')\n" +
+								"  name : list('Woody', 'Buzz', 'Slinky'),\n" +
+								"  rank : range(2, 4)\n" +
 								"};\n\n" +
-								"var results = generate(generator, account);\n" }
-
+								"var results = generate(generator, toy);" },
+				{ title 	  : "Prepend/append generators",
+				  input		  : "var toy = {\n" +
+								"  name : 'Woody',\n" +
+								"  rank : 1,\n" +
+								"  type : 'cowboy'\n" +
+								" };\n\n" +
+								"var generator = {\n" +
+								"  name : prepend('Sheriff '),\n" +
+								"  type : append(' doll'),\n" +
+								"  rank : 2\n" +
+								"};\n\n" +
+								"var results = generate(generator, toy);" },
+				{ title 	  : "Random generator",
+				  input		  : "var toy = {\n" +
+								"  name : 'Woody',\n" +
+								"  rank : 1,\n" +
+								"  type : 'cowboy'\n" +
+								" };\n\n" +
+								"var generator = {\n" +
+								"  name : append(random().alpha(5)),\n" +
+								"  rank : random().int(10, 20)\n" +
+								"};\n\n" +
+								"var results = generate(generator, toy);" },
+				{ title 	  : "Name generator with chain",
+				  input		  : "var toy = {\n" +
+								"  name : 'Woody',\n" +
+								"  rank : 1,\n" +
+								"  type : 'cowboy'\n" +
+								" };\n\n" +
+								"var randomName = chain(random().int(), \n" +
+								"  function(i) { return append('-' + i); });\n\n" +
+								"var generator = {\n" +
+								"  name : repeat(10, randomName)\n" +
+								"};\n\n" +
+								"var results = generate(generator, toy);" },
+				{ title 	  : "Dictionary example",
+				  input		  : "var toy = {\n" +
+								"  name : 'Woody',\n" +
+								"  rank : 1,\n" +
+								"  type : 'cowboy'\n" +
+								" };\n\n" +
+								"var generator = {\n" +
+								"  name : names.list(10),\n" +
+								"  type : dictionary(['cowboy?',\n" + 
+								"                     'action figure?',\n" +
+								"                     'Army men?']).element()\n" +
+								"};\n\n" +
+								"var results = generate(generator, toy);" }
 			];
 
 			var run_generator = function(input) {
@@ -78,14 +125,14 @@
 				error.text("");
 
 				// validate input
-				//try {
-          with(Popcorn.All) {
-            eval(input);
-          }
-				//} catch(e) {
-			//		error.text(e.toString());
-			//		return;
-				//}
+				try {
+				  with(Popcorn.All) {
+					eval(input);
+				  }
+				} catch(e) {
+					error.text(e.toString());
+					return;
+				}
 
 				if (results === undefined) {
 					error.text("Missing 'results = generate(...)' call!");
@@ -124,28 +171,33 @@
 	</head>
 
 	<body>
-        <h3>Popcorn maker</h3>
+        <h3>Popcorn Maker</h3>
 
 		<table cellpadding="10">
 			<tr>
 				<td valign="top">
 <div>
-	Select a popcorn bucket:
+	Select an example:
 		<select id="examples">
 			<option>choose one</option>
 		</select>
 </div>
 <div>
-	or make a new one:
+	or build a new generator:
 </div>
 <textarea id="input" rows="25" cols="70">
-var account = { 
-};
+var toy = {
+  name : 'Woody',
+  rank : 1,
+  type : 'cowboy'
+ };
 
 var generator = {
+  name : list('Woody', 'Buzz', 'Slinky'),
+  rank : range(2, 4)
 };
 
-var results = generate(generator, account);
+var results = generate(generator, toy);
 </textarea>
 
 					<div><a href="javascript:;" onclick="run_generator($('#input').val())">Generate objects</a></div>
