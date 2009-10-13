@@ -33,10 +33,11 @@
  * </code></pre>
  *
  * @project Popcorn
- * @timestamp
+ * @version 0.2
  * @author Adam Smyczek
  * @author Brian Wilkerson
  * @description Popcorn - a DSL for JSON
+ * @timestamp
  */
 
 // --------------------------------------------------------------------------
