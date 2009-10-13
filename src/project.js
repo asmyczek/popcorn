@@ -33,7 +33,7 @@
  * </code></pre>
  *
  * @project Popcorn
- * @version 0.2
+ * @version
  * @author Adam Smyczek
  * @author Brian Wilkerson
  * @description Popcorn - a DSL for JSON
