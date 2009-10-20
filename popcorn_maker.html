@@ -111,7 +111,22 @@
 								"                     'action figure?',\n" +
 								"                     'Army men?']).element()\n" +
 								"};\n\n" +
-								"var results = generate(generator, toy);" }
+								"var results = generate(generator, toy);" },
+				{ title 	  : "Cascading generators",
+				  input		  : "var toy = {\n" +
+                "  who  : {\n" +
+                "           name : 'Woody',\n" +
+                "           type : 'cowboy'\n" +
+                "         },\n" +
+								"  rank : 1\n" +
+								" };\n\n" +
+								"var generator = {\n" +
+                "  who  : {\n" + 
+                "           name : list('Woody', 'Buzz', 'Slinky')\n" +
+                "         },\n" +
+								"  rank : range(2, 4)\n" +
+								"};\n\n" +
+								"var results = generate(generator, toy);" },
 			];
 
 			var run_generator = function(input) {
@@ -159,7 +174,7 @@
 						out += '<tr><td class="idx">' + (i + 1) + '</td>';
             var td = "";
             for (var j = 0, jl = names.length; j < jl; j++) {
-              td = '<td>' + results[i][names[j]] + '</td>' + td;
+              td = '<td>' + print(results[i][names[j]]) + '</td>' + td;
             }
 						out += td + '</tr>';
 					}
@@ -167,6 +182,21 @@
 					output.append(out);
 				}
 			};
+
+      // Helper print function
+      var print = function(value) {
+        with(Popcorn.Utils) {
+          if (isObject(value)) {
+            var out = '{ ';
+            for (var name in value) {
+              out += name + ': ' + print(value[name]) + ', ';
+            }
+            return out.substring(0, out.length-2) + ' }';
+          }
+          return value;
+        }
+      };
+
 		</script>
 	</head>
 

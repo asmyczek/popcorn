@@ -47,6 +47,18 @@
 		</p>
 
 		<p>
+		<div><b>Cascading generator object</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+			  var d     = { name : { first : "John", last : 'Who' } };
+            assertGen(mutate("name", [gen({ first : gen('Fred') })]), d, 
+					[{ name : { first : "Fred", last : 'Who' } }], 
+                "mutate(cascading)");
+          }
+		</script>
+		</p>
+
+		<p>
 		<div><b>Random generators</b></div>
         <script type="text/javascript">
           with(Popcorn.Core) {

@@ -584,17 +584,28 @@ Popcorn.Core = function (utils) {
    */
   var mutate = lib.mutate = function(name, gs) {
     return function(o) {
-      O.prototype = o;
       if (gs.length > 0) {
         var r = [], n;
         for (var i = 0, l = gs.length; i < l; i++) {
           var gr = gs[i](o[name]);
+          // Mutate on an array
           if (utils.isArray(gr)) {
             n = [];
             for (var j = 0, jl = gr.length; j < jl; j++) {
+              O.prototype = o;
               n[j] = new O();
               n[j][name] = gr[j];
             }
+          // Mutate on an object
+          } else if (utils.isObject(gr)) {
+            var ogr = generate(gr, o[name]);
+            n = [];
+            for (var k = 0, kl = ogr.length; k < kl; k++) {
+              O.prototype = o;
+              n[k] = new O();
+              n[k][name] = ogr[k];
+            }
+          // All other values
           } else {
             n = new O();
             n[name] = gr;

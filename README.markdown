@@ -113,6 +113,19 @@ into a separate library and used with any other generator, for example:
 	repeat(10, randomUser)('user'); // Generates 10 random user names.
 </core></pre>
 
+It is possible to define generators not only on root attributes of an object 
+but on attributes of cascading objects as well, for example:
+
+<pre><core>
+var generator = {
+	id   : range(1, 3),
+	name : {
+       first : list('Buzz', 'Slinky'),
+       last  : 'Toy'
+    }
+};
+</core></pre>
+
 See 'popcorn_maker.html' and API documentation for more information and 
 the complete generator list.
 
