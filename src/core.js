@@ -731,6 +731,79 @@ Popcorn.Core = function (utils) {
     return permutate(gs)(base, s);
   };
 
+  // ------ State and variables ------
+
+  /**
+   * 'setVar' stores the result of one generator that can be used
+   * as input to another generator in same generation process. <br/>
+   * For example:
+   *
+   * <pre>
+   *   var g = {
+   *     int   : setVar('my_rand', random().int()),
+   *     plus1 : withVar('my_rand', function(i) { return gen(i + 1); })
+   *   }
+   * </pre>
+   *
+   * The random integer value generated for attribute 'int' is stored
+   * in the state object under the attribute name 'my_rand' and referenced
+   * using {@link withVar} function.
+   *
+   * @function {generator} setVar
+   * @param {string} name - variable name the generator value is stored for.
+   * @param {generator} g - the generator to execute.
+   * @return result of the generator 'g'.
+   */
+  var setVar = lib.setVar  = function(name, g) {
+    return function(o, s) { 
+      var r = g(o, s);
+      r.state[name] = r.result;
+      return gen(r.result)(o, r.state);
+    };
+  };
+
+  /**
+   * 'withVar' provides access to variables stored using {@link setVar}
+   * generator. It takes the variable name and a function as argument. 
+   * The value of the variable is passed to the function that has 
+   * to return another generator as result. 
+   * For an example see {@link setVar} generator.
+   *
+   * @function {generator} withVar
+   * @param {string} name - variable name.
+   * @param {function} f - takes the variable as argument and returns 
+   *     a new generator as result.
+   */
+  var withVar = lib.withVar = function(name, f) {
+    return function (o, s) { 
+      return f(s[name])(o, s);
+    };
+  }; 
+
+  /**
+   * 'withState' provides access to the state object.
+   * The function 'f' takes the state object as argument
+   * and returns another generator as result. All modifications
+   * to the state object are visible to other generators.
+   * For example:
+   *
+   * <pre>
+   *   var g = {
+   *     int : withState(function(s) { s.init = 10; return random().int(); } ),
+   *     add : withState(function(s) { return gen(s.init + 10); } )
+   *   }
+   * </pre>
+   *
+   * @function {generator} withState
+   * @param {function} f - takes the state object as argument and 
+   *    returns a new generator as result.
+   */
+  var withState = lib.withState = function(f) {
+    return function (o, s) { 
+      return f(s)(o, s);
+    };
+  }; 
+
   // ------ Core random generators ------
 
   /**

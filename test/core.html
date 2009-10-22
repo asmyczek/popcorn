@@ -47,6 +47,33 @@
 		</p>
 
 		<p>
+		<div><b>State and variables</b></div>
+        <script type="text/javascript">
+          with(Popcorn.Core) {
+            var b = { att1: 'att1' },
+                g = { att1: setVar('var1', gen('att1-1')) };
+
+			var r = generateWithState(g, b);
+			assert(r.result[0].att1, 'att1-1', 'setVar(result)');
+			assert(r.state.var1, 'att1-1', 'setVar(state)');
+
+			g = { att1: setVar('var1', gen(10)),
+		   	      att2: withVar('var1', function(v) { return gen(v + 5); }) };
+			var r = generateWithState(g, b);
+			assert(r.result[0].att2, 15, 'withVar()');
+
+			g = { att1: withState(function(s) { 
+					s.var1 = 'var1';
+					return gen('att1-1'); })
+				};
+			var r = generateWithState(g, b);
+			assert(r.state.var1, 'var1', 'withState()');
+          }
+
+		</script>
+		</p>
+
+		<p>
 		<div><b>Cascading generator object</b></div>
         <script type="text/javascript">
           with(Popcorn.Core) {
