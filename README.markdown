@@ -3,7 +3,7 @@ Popcorn - a DSL for JSON
 
 ## Description
 
-Popcorn is a JavaScript embedded DSL designed for quick, ease and
+Popcorn is a JavaScript embedded DSL designed for quick, easy and
 flexible JSON object generation. The core modules provides a basic set
 of generators for most common JavaScript types, and combinators to build
 new generators for any kind of data. Additional modules extend the 
@@ -176,6 +176,39 @@ object:
 
 Popcorn comes with several default dictionaries for most common
 names, surnames, passwords, domains etc.
+
+## State and variables
+
+The generation process maintains a state object that is accessible and
+modifiable by all generators. The `generate()` function takes an optional
+state object as argument. If this is not provided, an empty object is created.
+
+To access the state use `withState()` generator, for example:
+
+<pre><core>
+var generator = {
+	id  : withState(function(s) { s.id = 1; return gen(s.id); }),
+	user: withState(function(s) { return gen('user-' + s.id); })
+};
+</core></pre>
+
+The first generator sets an id attribute on the state object
+and returns a generator for this id. The id value of the state
+is used in the second generator to create user names of the 
+form 'user-1'. 
+`withState()` has to return another generator as result.
+
+To simplify access to the state object, Popcorn provides functions to 
+store generator results in variables and reuse this values in other
+generators, `setVar()` and `withVar()`. Using this generators,
+the example above could be simplified to:
+
+<pre><core>
+var generator = {
+	id  : setVar('id', random().int()),
+	user: withVar('id', function(id) { return gen('user-' + id); })
+};
+</core></pre>
 
 ## License
 
