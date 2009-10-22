@@ -71,15 +71,20 @@ Popcorn.Common = function (core) {
   // to default value based on handler function.
   var pre_a_pend = function(h) {
     return function(g) {
-      return function(o) {
+      return function(o, s) {
         switch (core.typeOf(g)) {
           case 'array'    : 
-              var apply = function(ri) { return pre_a_pend(h)(ri)(o); };
-              return core.gen(core.map(apply, g))(o);
+            var rs = [], ns = s, r;
+            for (var i = 0, l = g.length; i < l; i++) {
+              r = pre_a_pend(h)(g[i])(o, ns);
+              rs = rs.concat(r.result);
+              ns = r.state;
+            }
+            return { result: rs, state: ns };
           case 'function' : 
-              return core.chain(g, function(r) { return core.gen(h(r, o)); })(o); 
+            return core.chain(g, function(r) { return core.gen(h(r, o)); })(o, s); 
           default         : 
-            return h(g, o);
+            return { result: h(g, o), state: s };
         };
       };
     };
@@ -133,9 +138,9 @@ Popcorn.Common = function (core) {
       var mm      = core.args2range(arguments, 1, 100),
           int     = this.int(mm[0], mm[1]),
           element = this.element(char_set);
-      return core.lazy(function() {
-        var l = int(), r = "";
-        for (var i = 0; i < l; i++) r += element();
+      return core.lazy(function(o, s) {
+        var l = int().result, r = "";
+        for (var i = 0; i < l; i++) r += element().result;
         return core.gen(r);
       });
     };

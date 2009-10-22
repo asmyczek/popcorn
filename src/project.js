@@ -48,7 +48,21 @@
 
 /**
  * A generator is a function that takes one argument and 
- * returns a value. Popcorn provides functions to create
+ * returns an object of the form:
+ *
+ * <pre><code>
+ *   {
+ *     result: value,
+ *     state : state_obj
+ *   }
+ * </code></pre>
+ *
+ * 'result' is the evaluation result of the generator.
+ * A state object is passed to the generation process
+ * and can be manipulated by any generator. See 
+ * {@link Popcorn.Core.generate} for details.
+ * 
+ * Popcorn provides functions to create
  * and combine generators to build any kind of data.
  * See README for more information.
  *

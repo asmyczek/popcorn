@@ -25,11 +25,11 @@ var assertFalse = function(result, desc) {
 // Assert with generator as argument
 var assertGen = function(generator, input, expects, desc) {
   if (core.isArray(generator)) {
-    assert(expects, core.map(function(g) { return g(input); }, generator), desc);
+    assert(expects, core.map(function(g) { return g(input).result; }, generator), desc);
   } else if (core.isFunction(expects)) {
-    assertTrue(expects(generator(input)), desc);
+    assertTrue(expects(generator(input).result), desc);
   } else {
-    assert(expects, generator(input), desc);
+    assert(expects, generator(input).result, desc);
   }
 };
 

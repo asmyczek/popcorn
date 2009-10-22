@@ -47,12 +47,12 @@ Popcorn.Network = function (core, common, dict, names) {
   var ip2int = function(ip) {
     if (ip.length > 3) throw "Max 3 IP octets supported."
     var rip = ip.reverse();
-    return core.seq(core.mapGen(rip.slice(1)), function(r, o, i) { return r + (o << (8 << i)); }, rip[0])();
+    return core.seq(core.mapGen(rip.slice(1)), function(r, o, i) { return r + (o << (8 << i)); }, rip[0])().result;
   };
 
   // Opposite to ip2int converts an int to last three IP octets.
   var int2ip = function(i) {
-    return core.seq(core.mapGen([0,8,16]), function(r, s) { return r.concat((i >> s) & 255); }, [])().reverse();
+    return core.seq(core.mapGen([0,8,16]), function(r, s) { return r.concat((i >> s) & 255); }, [])().result.reverse();
   };
  
   // ------ Random generators extensions ------
@@ -83,7 +83,7 @@ Popcorn.Network = function (core, common, dict, names) {
         int  = this.int(from, to);
 
     return core.lazy(function() {
-      return core.gen(ip2str([ip1[0]].concat(int2ip(int()))));
+      return core.gen(ip2str([ip1[0]].concat(int2ip(int().result))));
     });
   };
 
@@ -101,7 +101,7 @@ Popcorn.Network = function (core, common, dict, names) {
     return core.lazy(function() {
       var mac = "00";
       for (var i = 0; i < 5; i++) {
-        mac = mac.concat(del, hCh(), hCh());
+        mac = mac.concat(del, hCh().result, hCh().result);
       }
       return core.gen(mac);
     });
@@ -121,7 +121,7 @@ Popcorn.Network = function (core, common, dict, names) {
         s = names.surnames.element(this),
         d = domains.element(this);
     return core.lazy(function() {
-      return core.gen("".concat(n(), ".", s(), "@", s(), ".", d()));
+      return core.gen("".concat(n().result, ".", s().result, "@", s().result, ".", d().result));
     });
   };
 

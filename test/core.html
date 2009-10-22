@@ -13,7 +13,7 @@
 		<div><b>Core lib</b></div>
         <script type="text/javascript">
           with(Popcorn.Core) {
-            assertGen(Popcorn.Core.gen("abc"), null, "abc", "gen()");
+            assertGen(gen("abc"), null, "abc", "gen()");
             assertGen(chain(gen("a"), function(a) { return gen(a + "bc"); }), null, "abc", "chain()");
             assertGen(seq([gen("a"), gen("b")], concat), null, ["a", "b"], "seq(concat)");
             assertGen(seq([gen("a"), gen("b")], join), null, "ab", "seq(join)");
@@ -63,7 +63,7 @@
         <script type="text/javascript">
           with(Popcorn.Core) {
             var rand = random(12345);
-            var seedTest = [rand.int()(), rand.int()(), rand.int()()];
+            var seedTest = [rand.int()().result, rand.int()().result, rand.int()().result];
             assertGen(repeat(3, random(12345).int()), null, seedTest, "random(seed)");
             assertGen(rand.int(1,5), null, function(r) { return (r >= 1) && (r <= 5); }, "int()");
             assertGen(rand.int(1,1), null, 1, "int(1,1)");

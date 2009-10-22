@@ -363,7 +363,7 @@ Popcorn.Core = function (utils) {
    * @return a {@link generator} which executed returns the value 'v'.
    */
   var gen = lib.gen = function(v) {
-    return function () { return v; };
+    return function (_, s) { return { result: v, state: s }; };
   };
 
   /**
@@ -394,12 +394,14 @@ Popcorn.Core = function (utils) {
    * @return the 'chain' generator.
    */
   var chain = lib.chain = function(g, f) {
-    return function(o) {
+    return function(o, s) {
       if (utils.isArray(g)) {
-        return f(seq(g, concat)(o))(o);
+        var r = seq(g, concat)(o, s);
+        return f(r.result)(o, r.state);
       } else {
-        var r = f(g(o));
-        return (utils.isArray(r))? seq(r, concat)(o) : r(o);
+        var r = g(o, s);
+            a = f(r.result);
+        return (utils.isArray(a))? seq(a, concat)(o, r.state) : a(o, r.state);
       }
     };
   };
@@ -426,15 +428,17 @@ Popcorn.Core = function (utils) {
    * @return the sequence generator that evaluates the generators 'gs' when executed.
    */
   var seq = lib.seq = function(gs, f, init) {
-    return function(o) {
+    return function(o, s) {
       if (gs.length > 0) {
-        var r = init;
+        var r = init, ns = s, ir;
         for (var i = 0, l = gs.length; i < l; i++) {
-          r = f(r, gs[i](o), i);
+          ir = gs[i](o, ns);
+          r = f(r, ir.result, i);
+          ns = ir.state;
         };
-        return r;
+        return { result: r, state: ns };
       }
-      return o;
+      return { result: o, state: s };
     };
   };
 
@@ -540,7 +544,11 @@ Popcorn.Core = function (utils) {
    */
   var property = lib.property = function(name) {
     return function(g) { 
-      return function(o) { o[name] = g(o[name]); return o; };
+      return function(o, s) { 
+        var r = g(o[name]);
+        o[name] = r.result;
+        return { result: o, state: r.state };
+      };
     };
   };
 
@@ -549,7 +557,7 @@ Popcorn.Core = function (utils) {
    * and returns the updated object. <br/>
    * For example:
    * <pre>
-   *   var o    = { name:'Woody', toy:'cowboy' };
+   *   var o    = { name: 'Woody', toy: 'cowboy' };
    *   var name = property('name');
    *   var toy  = property('toy');
    *   update([name(gen('Buzz')), toy(gen('action figure'))])(o) will return the object 
@@ -573,7 +581,7 @@ Popcorn.Core = function (utils) {
    * one result object for every generator result value.<br/>
    * For example:
    * <pre>
-   *   var o = { name:'Woody', age:2 };
+   *   var o = { name: 'Woody', age:2 };
    *   mutate('name', [gen('Buzz'), gen('Woody')](o) will return 
    *   the object array [{ name:'Buzz', age:2 }, { name:'Woody', age:2 }]
    * </pre>
@@ -583,38 +591,40 @@ Popcorn.Core = function (utils) {
    * @param {generator[]} gs - {@link generator} array.
    */
   var mutate = lib.mutate = function(name, gs) {
-    return function(o) {
+    return function(o, s) {
       if (gs.length > 0) {
-        var r = [], n;
+        var r = [], ns = s, n;
         for (var i = 0, l = gs.length; i < l; i++) {
-          var gr = gs[i](o[name]);
+          var gr = gs[i](o[name], ns);
+          ns = gr.state;
           // Mutate on an array
-          if (utils.isArray(gr)) {
+          if (utils.isArray(gr.result)) {
             n = [];
-            for (var j = 0, jl = gr.length; j < jl; j++) {
+            for (var j = 0, jl = gr.result.length; j < jl; j++) {
               O.prototype = o;
               n[j] = new O();
-              n[j][name] = gr[j];
+              n[j][name] = gr.result[j];
             }
           // Mutate on an object
-          } else if (utils.isObject(gr)) {
-            var ogr = generate(gr, o[name]);
+          } else if (utils.isObject(gr.result)) {
+            var ogr = generateWithState(gr.result, o[name], ns);
+            ns = ogr.state;
             n = [];
-            for (var k = 0, kl = ogr.length; k < kl; k++) {
+            for (var k = 0, kl = ogr.result.length; k < kl; k++) {
               O.prototype = o;
               n[k] = new O();
-              n[k][name] = ogr[k];
+              n[k][name] = ogr.result[k];
             }
           // All other values
           } else {
             n = new O();
-            n[name] = gr;
+            n[name] = gr.result;
           }
           r = r.concat(n);
         };
-        return r;
+        return { result: r, state: ns };
       }
-      return [o];
+      return { result: [o], state: s };
     };
   };
 
@@ -631,24 +641,28 @@ Popcorn.Core = function (utils) {
 
     // Recursive permutate helper applies 
     // generator 'g' on all objects 'os'.
-    var per_impl = function(g, os) {
-      var r = [];
+    var per_impl = function(g, os, s) {
+      var rs = [], ns = s, r;
       for (var i = 0, l = os.length; i < l; i++) {
         O.prototype = os[i];
-        r = r.concat(g(new O()));
+        r = g(new O(), ns);
+        ns = r.state;
+        rs = rs.concat(r.result);
       }
-      return r;
+      return { result: rs, state: ns };
     };
 
-    return function(o) {
+    return function(o, s) {
       if (gs.length > 0) {
-        var r = [o];
+        var rs = [o], ns = s, r;
         for (var i = 0, l = gs.length; i < l; i++) {
-          r = per_impl(gs[i], r);
+          r = per_impl(gs[i], rs, ns);
+          ns = r.state;
+          rs = r.result;
         }
-        return r;
+        return { result: rs, state: ns };
       }
-      return [o];
+      return { result: [o], state: s };
     };
   };
 
@@ -659,22 +673,43 @@ Popcorn.Core = function (utils) {
    * resulting object array.<br/>
    * For example: 
    * <pre>
-   *   var base = { name:'Woody', age:2 }; 
-   *   var gen  = { name:list('Buzz', 'Slinky'), age:range(2,4) }; 
+   *   var base = { name: 'Woody', age:2 }; 
+   *   var gen  = { name: list('Buzz', 'Slinky'), age:range(2,4) }; 
    *   generate(gen, base) will return the array: 
-   *    [{ name:'Buzz', age:2 },
-   *     { name:'Buzz', age:3 }, 
-   *     { name:'Buzz', age:4 }, 
-   *     { name:'Slinky', age:2 }, 
-   *     { name:'Slinky', age:3 }, 
-   *     { name:'Slinky', age:4 }]
+   *    [{ name: 'Buzz',   age: 2 },
+   *     { name: 'Buzz',   age: 3 }, 
+   *     { name: 'Buzz',   age: 4 }, 
+   *     { name: 'Slinky', age: 2 }, 
+   *     { name: 'Slinky', age: 3 }, 
+   *     { name: 'Slinky', age: 4 }]
    * </pre>
    *
    * @function {object[]} generate
    * @param {object} gen - the generator object.
    * @param {object} base - the base test case object.
+   * @param {object} state - an optional state object that
+   *    can be read and manipulated by any generator.
    */
-  var generate = lib.generate = function(generator, base) {
+  var generate = lib.generate = function(generator, base, state) {
+    return generateWithState(generator, base, state).result;
+  };
+
+  /**
+   * Same as {@link generate} but returns the generator result object:
+   *
+   * <pre><code>
+   *   {
+   *     result: value,    // generator result
+   *     state : state_obj // state object passed to the generate function
+   *   }
+   * </code></pre>
+   *
+   * This function may become handy if the generators
+   * manipulate the state object, for example to accumulate statistics
+   * that need to be accessed after the generation process finished.
+   */
+  var generateWithState = lib.generateWithState = function(generator, base, state) {
+    var s = state || {};
     var v, prop, gs = [];
     for (var name in generator) {
       v     = generator[name];
@@ -693,7 +728,7 @@ Popcorn.Core = function (utils) {
       }
     }
 
-    return permutate(gs)(base);
+    return permutate(gs)(base, s);
   };
 
   // ------ Core random generators ------
@@ -805,7 +840,7 @@ Popcorn.Core = function (utils) {
    * @param g - the {@link generator} to wrap.
    */
   var lazy = lib.lazy = function(g) {
-    return function(o) { return g(o)(o); };
+    return function(o, s) { return g(o, s)(o, s); };
   };
 
   /**
