@@ -396,12 +396,12 @@ Popcorn.Core = function (utils) {
   var chain = lib.chain = function(g, f) {
     return function(o, s) {
       if (utils.isArray(g)) {
-        var r = seq(g, concat)(o, s);
+        var r = seq(g, cConcat)(o, s);
         return f(r.result)(o, r.state);
       } else {
         var r = g(o, s);
             a = f(r.result);
-        return (utils.isArray(a))? seq(a, concat)(o, r.state) : a(o, r.state);
+        return (utils.isArray(a))? seq(a, cConcat)(o, r.state) : a(o, r.state);
       }
     };
   };
@@ -413,7 +413,7 @@ Popcorn.Core = function (utils) {
    * and the result of the current generator evaluation. <br/>
    * For example:
    * <pre>
-   *   var g = seq(gen('a'), gen('b'), gen('c'), join, 0);
+   *   var g = seq(gen('a'), gen('b'), gen('c'), cJoin, 0);
    *   g('any input') will return 'abc'.
    * </pre>
    *
@@ -422,8 +422,8 @@ Popcorn.Core = function (utils) {
    * @param {combinator} f - {@link combinator} function.
    * @param {any} init - the initial value passed on first call to the {@link combinator}.
    *
-   * @see Popcorn.Core.concat
-   * @see Popcorn.Core.join
+   * @see Popcorn.Core.cConcat
+   * @see Popcorn.Core.cJoin
    *
    * @return the sequence generator that evaluates the generators 'gs' when executed.
    */
@@ -475,7 +475,7 @@ Popcorn.Core = function (utils) {
    * This function is a specialization of {@link seq}. <br/> 
    * Example:
    * <pre>
-   *   var overflow = replicate(gen('A'), join, '');
+   *   var overflow = replicate(gen('A'), cJoin, '');
    *   overflow(5) generates 'AAAAA'
    * </pre>
    *
@@ -496,34 +496,34 @@ Popcorn.Core = function (utils) {
   };
 
   /**
-   * 'concat' {@link combinator} function concatenates the results 
+   * 'cConcat' {@link combinator} function concatenates the results 
    * of generators executed in sequence into one array. <br/>
    * For example:
    * <pre>
-   *   seq([gen(1), gen(2)], concat)() => [1,2]
+   *   seq([gen(1), gen(2)], cConcat)() => [1,2]
    * </pre>
-   * 'concat' can be used in combination with {@link seq] and {@link replicate}.
+   * 'cConcat' can be used in combination with {@link seq] and {@link replicate}.
    *
-   * @function {generator} concat
+   * @function {any} cConcat
    * @param {any} r - combined result of previous executions.
    * @param {any} n - result of current generator evaluation.
    */
-  var concat = lib.concat = function(r, n) { return (r || []).concat(n); };
+  var cConcat = lib.cConcat = function(r, n) { return (r || []).concat(n); };
 
   /**
-   * 'join' combinator function joins the results of generators
+   * 'cJoin' combinator function joins the results of generators
    * executed in sequence into one string. <br/>
    * For example:
    * <pre>
-   *   seq([gen(1), gen(2)], join)() => '12'
+   *   seq([gen(1), gen(2)], cJoin)() => '12'
    * </pre>
-   * 'join' can be used in combination with {@link seq] and {@link replicate}.
+   * 'cJoin' can be used in combination with {@link seq] and {@link replicate}.
    *
-   * @function {generator} join
+   * @function {any} cJoin
    * @param {any} r - combined result of previous executions.
    * @param {any} n - result of current generator evaluation.
    */
-  var join = lib.join = function(r, n) { return (r || '') + n; };
+  var cJoin = lib.cJoin = function(r, n) { return (r || '') + n; };
 
   // ------ Handling objects ------
 
