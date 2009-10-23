@@ -15,9 +15,9 @@
           with(Popcorn.Core) {
             assertGen(gen("abc"), null, "abc", "gen()");
             assertGen(chain(gen("a"), function(a) { return gen(a + "bc"); }), null, "abc", "chain()");
-            assertGen(seq([gen("a"), gen("b")], concat), null, ["a", "b"], "seq(concat)");
-            assertGen(seq([gen("a"), gen("b")], join), null, "ab", "seq(join)");
-            assertGen(replicate(gen("a"), join)(3), null, "aaa", "replicate(join)");
+            assertGen(seq([gen("a"), gen("b")], cConcat), null, ["a", "b"], "seq(cConcat)");
+            assertGen(seq([gen("a"), gen("b")], cJoin), null, "ab", "seq(cJoin)");
+            assertGen(replicate(gen("a"), cJoin)(3), null, "aaa", "replicate(cJoin)");
             assert(['a','a','a'], repeat(3, 'a'), "repeat()");
           }
 		</script>
@@ -53,21 +53,26 @@
             var b = { att1: 'att1' },
                 g = { att1: setVar('var1', gen('att1-1')) };
 
-			var r = generateWithState(g, b);
-			assert(r.result[0].att1, 'att1-1', 'setVar(result)');
-			assert(r.state.var1, 'att1-1', 'setVar(state)');
+            var r = generateWithState(g, b);
+            assert(r.result[0].att1, 'att1-1', 'setVar(result)');
+            assert(r.state.var1, 'att1-1', 'setVar(state)');
 
-			g = { att1: setVar('var1', gen(10)),
-		   	      att2: withVar('var1', function(v) { return gen(v + 5); }) };
-			var r = generateWithState(g, b);
-			assert(r.result[0].att2, 15, 'withVar()');
+            g = { 
+              att1: setVar('var1', gen(10)),
+              att2: withVar('var1', function(v) { return gen(v + 5); }),
+              att3: varGen('var1')
+            };
+            var r = generateWithState(g, b);
+            assert(r.result[0].att2, 15, 'withVar()');
+            assert(r.result[0].att3, 10, 'varGen()');
 
-			g = { att1: withState(function(s) { 
-					s.var1 = 'var1';
-					return gen('att1-1'); })
-				};
-			var r = generateWithState(g, b);
-			assert(r.state.var1, 'var1', 'withState()');
+            g = { 
+              att1: withState(function(s) { 
+                s.var1 = 'var1';
+                return gen('att1-1'); })
+              };
+            var r = generateWithState(g, b);
+            assert(r.state.var1, 'var1', 'withState()');
           }
 
 		</script>
@@ -96,7 +101,8 @@
             assertGen(rand.int(1,1), null, 1, "int(1,1)");
             assertGen(random().int(1,1), null, 1, "random().int()");
             assertGen(rand.element(['a']), null, 'a', "elemetn(one element)");
-            assertGen(rand.element(['a', 'b', 'c']), null, function(r) { return "abc".indexOf(r) >= 0; }, "elemetn(array)");
+            assertGen(rand.element(['a', 'b', 'c']), null, function(r) { return "abc".indexOf(r) >= 0; }, 
+                "elemetn(array)");
           }
 		</script>
 		</p>

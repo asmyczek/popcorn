@@ -65,6 +65,39 @@ Popcorn.Common = function (core) {
     return core.mapGen(core.args2array(arguments));
   };
 
+  /**
+   * Joins arguments together. Generator arguments
+   * are evaluated and array arguments join recursive.
+   *
+   * @function {generator} join
+   * @param {any+} args - values, arrays or generators.
+   */
+  var join = lib.join = function() {
+    var args = core.args2array(arguments);
+    return function(o, s) {
+      var rs = "", ns = s, r;
+      for (var i = 0, l = args.length; i < l; i++) {
+        var r = args[i];
+        switch(core.typeOf(r)) {
+          case 'function' :
+            var gr = r(o, s);
+            rs += gr.result;
+            ns = gr.state;
+            break;
+          case 'array' :
+            var gr = join.apply(this, r)(o, s);
+            rs += gr.result;
+            ns = gr.state;
+            break;
+          default:
+            rs += r;
+            break;
+        }
+      }
+      return { result: rs, state: ns };
+    };
+  };
+
   // ------ Prepend/append generators ------
 
   // Internal prepend/append function prepends/appends 

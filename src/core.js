@@ -781,6 +781,28 @@ Popcorn.Core = function (utils) {
   }; 
 
   /**
+   * Creates a generator that returns the value of the
+   * variable 'name' when executed. For example:
+   *
+   * <pre>
+   *   var g = {
+   *     att1 : setVar('my_rand', random().int()),
+   *     att2 : varGen('my_rand')
+   *   }
+   * </pre>
+   * will generate an object with same value for 
+   * both attributes.
+   *
+   * @function {generator} varGen
+   * @param {string} name - variable name.
+   */
+  var varGen = lib.varGen = function(name) {
+    return function (o, s) { 
+      return gen(s[name])(o, s);
+    };
+  };
+
+  /**
    * 'withState' provides access to the state object.
    * The function 'f' takes the state object as argument
    * and returns another generator as result. All modifications

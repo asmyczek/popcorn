@@ -18,6 +18,9 @@
             var dnow = new Date();
             assertGen(range(1,5), null, [1,2,3,4,5], "range()");
             assertGen(list('a','b','c'), null, ['a','b','c'], "list()");
+            assertGen(join('a','b','c'), null, 'abc', "join()");
+            assertGen(join(gen('a'),'b','c'), null, 'abc', "join(gen)");
+            assertGen(join(['a','b'],'c'), null, 'abc', "join(array)");
             assertGen(date(dnow, "date"), null, function(r) { return r === dnow.getDate(); }, "date(date)");
             assertGen(date('Sep 13, 2009', "date"), null, function(r) { return r === 13; }, "date(string)");
             assertGen(now("date"), null, function(r) { return r === dnow.getDate(); }, "now(date)");
