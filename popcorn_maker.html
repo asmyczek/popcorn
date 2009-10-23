@@ -114,19 +114,34 @@
 								"var results = generate(generator, toy);" },
 				{ title 	  : "Cascading generators",
 				  input		  : "var toy = {\n" +
-                "  who  : {\n" +
-                "           name : 'Woody',\n" +
-                "           type : 'cowboy'\n" +
-                "         },\n" +
+								"  who  : {\n" +
+								"           name : 'Woody',\n" +
+								"           type : 'cowboy'\n" +
+								"         },\n" +
 								"  rank : 1\n" +
 								" };\n\n" +
 								"var generator = {\n" +
-                "  who  : {\n" + 
-                "           name : list('Woody', 'Buzz', 'Slinky')\n" +
-                "         },\n" +
+								"  who  : {\n" + 
+								"           name : list('Woody', 'Buzz', 'Slinky')\n" +
+								"         },\n" +
 								"  rank : range(2, 4)\n" +
 								"};\n\n" +
 								"var results = generate(generator, toy);" },
+				{ title 	  : "Variables and state",
+				  input		  : "var toy = {\n" +
+								"  name : 'Woody',\n" +
+								"  rank : 1,\n" +
+								"  type : 'cowboy'\n" +
+								" };\n\n" +
+								"var generator = {\n" +
+								"  rank : setVar('rank', random().int(1,5)),\n" +
+								"  name : withVar('rank', function(r) { return append('-' + r); }),\n" +
+								"  type : withState(function(s) { return append(s.type + ' '); })\n" +
+								"};\n\n" +
+								"var state = { \n" +
+								"  type : ' doll' \n" +
+								"};\n\n" +
+								"var results = generate(generator, toy, state);" }
 			];
 
 			var run_generator = function(input) {
@@ -140,14 +155,14 @@
 				error.text("");
 
 				// validate input
-				try {
+				//try {
 				  with(Popcorn.All) {
 					eval(input);
 				  }
-				} catch(e) {
-					error.text(e.toString());
-					return;
-				}
+				//} catch(e) {
+				//	error.text(e.toString());
+				//	return;
+				//}
 
 				if (results === undefined) {
 					error.text("Missing 'results = generate(...)' call!");
