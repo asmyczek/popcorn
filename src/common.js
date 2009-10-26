@@ -62,7 +62,20 @@ Popcorn.Common = function (core) {
    * @param {any+} args - the values to generate.
    */
   var list = lib.list = function() {
-    return core.mapGen(core.args2array(arguments));
+    var args = core.args2array(arguments);
+    return function(o, s) {
+      var rs = [], r;
+      for (var i = 0, l = args.length; i < l; i++) {
+        r = args[i];
+        if (core.isArray(r)) {
+          rs = rs.concat(list.apply(this, r)(o, s).result);
+        } else {
+          rs.push(r);
+        }
+      }
+      return { result: rs, state: s };
+    };
+    // return core.mapGen(core.args2array(arguments));
   };
 
   /**

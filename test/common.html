@@ -18,6 +18,7 @@
             var dnow = new Date();
             assertGen(range(1,5), null, [1,2,3,4,5], "range()");
             assertGen(list('a','b','c'), null, ['a','b','c'], "list()");
+            assertGen(list(['a','b'],'c'), null, ['a','b','c'], "list(array)");
             assertGen(join('a','b','c'), null, 'abc', "join()");
             assertGen(join(gen('a'),'b','c'), null, 'abc', "join(gen)");
             assertGen(join(['a','b'],'c'), null, 'abc', "join(array)");

@@ -10,10 +10,10 @@ new generators for any kind of data. Additional modules extend the
 functionality with random generators, dictionaries, network type
 generators for IP or mac address and more.
 
-Popcorn can be used to generator mock objects for testing of JSON services
+Popcorn can be used to generate mock objects for testing of JSON services
 or browser side JavaScript code. Since with this DSL thousands of test cases
 can be expressed in just few lines of code, it makes for a great driver for
-data-driven test engines.
+data driven test engines.
 
 To see the DSL in action try 'popcorn_maker.html'.
 
