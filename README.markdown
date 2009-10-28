@@ -11,18 +11,11 @@ functionality with random generators, dictionaries, network type
 generators for IP or mac address and more.
 
 Popcorn can be used to generate mock objects for testing of JSON services
-or browser side JavaScript code. Since with this DSL thousands of test cases
+or browser side JavaScript code. Since using this DSL thousands of test cases
 can be expressed in just few lines of code, it makes for a great driver for
 data driven test engines.
 
-To see the DSL in action try 'popcorn_maker.html'.
-
-## Build
-
-Just load the Core, Common and other modules as needed. 
-Use [jGrouseDoc](http://code.google.com/p/jgrousedoc/) to build 
-API docs. Update 'build.properties' file with the location
-of the jGrouseDoc project and run ant.
+For a quick overview see [Popcorn - Data Driven Testing with JSON](http://labs.mudynamics.com/2009/10/26/popcorn-data-driven-testing-with-json/) and try [popcorn maker](http://labs.mudynamics.com/wp-content/uploads/2009/10/popcorn_maker.html).
 
 ## Getting started
 
@@ -207,6 +200,13 @@ var generator = {
 	user: withVar('id', function(id) { return gen('user-' + id); })
 };
 </core></pre>
+
+## Build
+
+Just load the Core, Common and other modules as needed. 
+Use [jGrouseDoc](http://code.google.com/p/jgrousedoc/) to build 
+API docs. Update 'build.properties' file with the location
+of the jGrouseDoc project and run ant.
 
 ## License
 
