@@ -57,8 +57,8 @@ Popcorn.Dictionary = function (core) {
        */
       list : function() { 
                var mm = core.args2range(arguments, 0, dict.length),
-                   ar = dict, r = new Array(l); 
-               while (ar.length < mm[1]) ar = ar.concat(dict); 
+                   ar = dict, r = []; 
+               while (ar.length < mm[1]) ar.push.apply(ar, dict);
                for (var i = 0, l = mm[1] - mm[0]; i < l; i++) {
                  r[i] = core.gen(ar[mm[0] + i]);
                }

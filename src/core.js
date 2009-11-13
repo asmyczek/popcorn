@@ -35,7 +35,7 @@ Popcorn.Utils = function () {
   var map = lib.map = function(f, as) {
     var ar = arrayOf(as), 
         l  = as.length,
-        r  = new Array(l);
+        r  = [];
     for (var i = 0; i < l; i++) r[i] = f(ar[i]);
     return r;
   };
@@ -140,6 +140,7 @@ Popcorn.Utils = function () {
    * @return a string representation of the type, for example 'null', 'array', 'data'.
    */
   var typeOf = lib.typeOf = function(inp) {
+    var undefined;
     if (inp === null) return 'null';
     if (inp === undefined) return 'undefined';
 
@@ -462,9 +463,9 @@ Popcorn.Core = function (utils) {
     var c  = Math.max(1, utils.intOf(n)),
         vs = [];
     if (utils.isArray(v)) {
-      for (var i = 0; i < c; i++) vs = vs.concat(v);
+      for (var i = 0; i < c; i++) vs.push.apply(vs, v);
     } else {
-      for (var i = 0; i < c; i++) vs[i] = v;
+      for (var i = 0; i < c; i++) vs.push(v);
     }
     return vs;
   };
@@ -489,7 +490,7 @@ Popcorn.Core = function (utils) {
   var replicate = lib.replicate = function(g, f, init) {
     return function(n) {
       var c  = Math.max(1, utils.intOf(n)),
-          gs = new Array(c);
+          gs = [];
       for (var i = 0; i < c; i++) gs[i] = g;
       return seq(gs, f, init);
     };
@@ -594,33 +595,33 @@ Popcorn.Core = function (utils) {
     return function(o, s) {
       if (gs.length > 0) {
         var r = [], ns = s, n;
-        for (var i = 0, l = gs.length; i < l; i++) {
+        for(var i = 0, l = gs.length; i < l; i++) {
           var gr = gs[i](o[name], ns);
           ns = gr.state;
           // Mutate on an array
           if (utils.isArray(gr.result)) {
-            n = [];
             for (var j = 0, jl = gr.result.length; j < jl; j++) {
               O.prototype = o;
-              n[j] = new O();
-              n[j][name] = gr.result[j];
+              n = new O();
+              n[name] = gr.result[j];
+              r.push(n);
             }
           // Mutate on an object
           } else if (utils.isObject(gr.result)) {
             var ogr = generateWithState(gr.result, o[name], ns);
             ns = ogr.state;
-            n = [];
             for (var k = 0, kl = ogr.result.length; k < kl; k++) {
               O.prototype = o;
-              n[k] = new O();
-              n[k][name] = ogr.result[k];
+              n = new O();
+              n[name] = ogr.result[k];
+              r.push(n);
             }
           // All other values
           } else {
             n = new O();
             n[name] = gr.result;
+            r.push(n);
           }
-          r = r.concat(n);
         };
         return { result: r, state: ns };
       }
@@ -642,12 +643,12 @@ Popcorn.Core = function (utils) {
     // Recursive permutate helper applies 
     // generator 'g' on all objects 'os'.
     var per_impl = function(g, os, s) {
-      var rs = [], ns = s, r;
+      var rs = [], rr, ns = s, r;
       for (var i = 0, l = os.length; i < l; i++) {
         O.prototype = os[i];
         r = g(new O(), ns);
         ns = r.state;
-        rs = rs.concat(r.result);
+        rs.push.apply(rs, r.result);
       }
       return { result: rs, state: ns };
     };

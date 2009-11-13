@@ -174,7 +174,7 @@
 
 				// Build result table
 				if (results.length > 0) {
-					var out = '<table class="out"><thead><tr><th>#</th>';
+					var out = ['<table class="out"><thead><tr><th>#</th>'];
           var th = "";
           var names = [];
 					for (var name in results[0]) {
@@ -184,32 +184,38 @@
 					for (var i = 0, l = names.length; i < l; i++) {
 						th = '<th>' + names[i] + '</th>' + th; 
 					}
-					out += th + '</tr></thead><tbody>';
+          out.push(th);
+					out.push('</tr></thead><tbody>');
 					for (i = 0, l = results.length; i < l; i++) {
-						out += '<tr><td class="idx">' + (i + 1) + '</td>';
-            var td = "";
-            for (var j = 0, jl = names.length; j < jl; j++) {
-              td = '<td>' + print(results[i][names[j]]) + '</td>' + td;
+            out.push('<tr><td class="idx">');
+            out.push(i + 1);
+            out.push('</td>');
+            var jl = names.length;
+            while(jl--) {
+              out.push('<td>');
+              out.push(print(results[i][names[jl]]));
+              out.push('</td>');
             }
-						out += td + '</tr>';
 					}
-					out += '</tbody></table>';
-					output.append(out);
+					out.push('</tbody></table>');
+					output.append(out.join(''));
 				}
 			};
 
       // Helper print function
       var print = function(value) {
-        with(Popcorn.Utils) {
-          if (isObject(value)) {
-            var out = '{ ';
-            for (var name in value) {
-              out += name + ': ' + print(value[name]) + ', ';
-            }
-            return out.substring(0, out.length-2) + ' }';
+        if (Popcorn.Utils.isObject(value)) {
+          var out = ['{ '];
+          for (var name in value) {
+            out.push(name);
+            out.push(': ');
+            out.push(print(value[name]));
+            out.push(', ');
           }
-          return value;
+          // return out.splice(out.length - 1, 1, ' }').join('');
+          return out.join('');
         }
+        return value;
       };
 
 		</script>

@@ -154,7 +154,7 @@ Popcorn.Network = function (core, common, dict, names) {
         ipi2 = ip2int(ip2.slice(1)),
         from = Math.min(ipi1, ipi2),
         to   = Math.max(ipi1, ipi2),
-        r    = new Array(to - from);
+        r    = [];
 
     // Create IP array
     for (var i = from; i <= to; i++) {

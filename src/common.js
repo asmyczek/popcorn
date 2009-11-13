@@ -43,7 +43,7 @@ Popcorn.Common = function (core) {
   var range = lib.range = function() {
     var mm = core.args2range(arguments, 0, 100),
         l  = mm[1] - mm[0],
-        r  = new Array(l);
+        r  = [];
     for (var i = 0; i <= l; i++) r[i] = core.gen(mm[0] + i);
     return r;
   };
@@ -68,7 +68,7 @@ Popcorn.Common = function (core) {
       for (var i = 0, l = args.length; i < l; i++) {
         r = args[i];
         if (core.isArray(r)) {
-          rs = rs.concat(list.apply(this, r)(o, s).result);
+          rs.push.apply(rs, list.apply(this, r)(o, s).result);
         } else {
           rs.push(r);
         }
@@ -123,7 +123,7 @@ Popcorn.Common = function (core) {
             var rs = [], ns = s, r;
             for (var i = 0, l = g.length; i < l; i++) {
               r = pre_a_pend(h)(g[i])(o, ns);
-              rs = rs.concat(r.result);
+              rs.push.apply(rs, r.result);
               ns = r.state;
             }
             return { result: rs, state: ns };
