@@ -18,7 +18,9 @@
             assertGen(seq([gen("a"), gen("b")], cConcat), null, ["a", "b"], "seq(cConcat)");
             assertGen(seq([gen("a"), gen("b")], cJoin), null, "ab", "seq(cJoin)");
             assertGen(replicate(gen("a"), cJoin)(3), null, "aaa", "replicate(cJoin)");
-            assert(['a','a','a'], repeat(3, 'a'), "repeat()");
+            assertGen(repeat(3, 'a'), null, ['a','a','a'], "repeat(value)");
+            assertGen(repeat(3, gen('a')), null, ['a','a','a'], "repeat(function)");
+            assertGen(repeat(3, [gen('a')]), null, ['a','a','a'], "repeat(array)");
           }
 		</script>
 		</p>

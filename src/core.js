@@ -306,7 +306,7 @@ Popcorn.Utils = function () {
    * @throws an exception if input is not a date object.
    */
   var dateOf = lib.dateOf = function(inp) {
-    var d = (core.isString(inp))? new Date(Date.parse(inp)) : inp;
+    var d = (isString(inp))? new Date(Date.parse(inp)) : inp;
     if (!isDate(d)) {
       throw "Invalid input '" + inp + "', expecting an Date object or parsable date string!";
     }
@@ -463,9 +463,11 @@ Popcorn.Core = function (utils) {
     var c  = Math.max(1, utils.intOf(n)),
         vs = [];
     if (utils.isArray(v)) {
-      for (var i = 0; i < c; i++) vs.push.apply(vs, v);
+      while (c--) vs.push.apply(vs, v);
+    } else if (utils.isFunction(v)) {
+      while (c--) vs.push(v);
     } else {
-      for (var i = 0; i < c; i++) vs.push(v);
+      while (c--) vs.push(gen(v));
     }
     return vs;
   };
