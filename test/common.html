@@ -26,8 +26,10 @@
             assertGen(date('Sep 13, 2009', "date"), null, function(r) { return r === 13; }, "date(string)");
             assertGen(now("date"), null, function(r) { return r === dnow.getDate(); }, "now(date)");
             assertGen(prepend("unit-"), "test", "unit-test", "prepend(string)");
+            assertGen(prepend("unit-", "test-overwrite"), "test", "unit-test-overwrite", "prepend(string, overwrite)");
             assertGen(prepend(gen("unit-")), "test", "unit-test", "prepend(generator)");
             assertGen(prepend([gen("unit1-"), gen("unit2-")]), "test", ["unit1-test", "unit2-test"], "prepend(array)");
+            assertGen(prepend([gen("unit1-"), gen("unit2-")]), "test-overwrite", ["unit1-test-overwrite", "unit2-test-overwrite"], "prepend(array, overwrite)");
             assertGen(append("-test"), "unit", "unit-test", "append(string)");
             assertGen(append(gen("-test")), "unit", "unit-test", "append(generator)");
             assertGen(append([gen("-test1"), gen("-test2")]), "unit", ["unit-test1", "unit-test2"], "append(array)");

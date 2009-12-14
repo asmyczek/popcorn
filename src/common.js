@@ -116,21 +116,22 @@ Popcorn.Common = function (core) {
   // Internal prepend/append function prepends/appends 
   // to default value based on handler function.
   var pre_a_pend = function(h) {
-    return function(g) {
+    return function(g, v) {
       return function(o, s) {
+        var pv = v || o;
         switch (core.typeOf(g)) {
           case 'array'    : 
             var rs = [], ns = s, r;
             for (var i = 0, l = g.length; i < l; i++) {
-              r = pre_a_pend(h)(g[i])(o, ns);
-              rs.push.apply(rs, r.result);
+              r = pre_a_pend(h)(g[i], v)(pv, ns);
+              rs.push.call(rs, r.result);
               ns = r.state;
             }
             return { result: rs, state: ns };
           case 'function' : 
-            return core.chain(g, function(r) { return core.gen(h(r, o)); })(o, s); 
+            return core.chain(g, function(r) { return core.gen(h(r, pv)); })(pv, s); 
           default         : 
-            return { result: h(g, o), state: s };
+            return { result: h(g, pv), state: s };
         };
       };
     };
