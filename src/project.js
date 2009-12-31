@@ -14,8 +14,8 @@
  * 
  * Quick start:
  * <pre><code>
- * with(Popcorn.Core) {
- * with(Popcorn.Common) { // Load other modules as needed.
+ * with({ core: Popcorn.Core }) {
+ * with({ comm: Popcorn.Common }) { // Load other modules as needed.
  *
  *   var base_object = { // Define the base object.
  *     id : 1, 
@@ -23,12 +23,12 @@
  *   };
  * 
  *   var generator = { // Define the generator object.
- *     id : range(10, 20),
- *     name : list('Buzz', 'Slinky')
+ *     id : core.range(10, 20),
+ *     name : comm.list('Buzz', 'Slinky')
  *   };
  * 
  *   // And run it!
- *   var results = generate(generator, base_object);
+ *   var results = core.generate(generator, base_object);
  * }}
  * </code></pre>
  *

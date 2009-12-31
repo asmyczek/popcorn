@@ -60,10 +60,10 @@
 								"  type : 'cowboy'\n" +
 								" };\n\n" +
 								"var generator = {\n" +
-								"  name : list('Woody', 'Buzz', 'Slinky'),\n" +
-								"  rank : range(2, 4)\n" +
+								"  name : p.list('Woody', 'Buzz', 'Slinky'),\n" +
+								"  rank : p.range(2, 4)\n" +
 								"};\n\n" +
-								"var results = generate(generator, toy);" },
+								"var results = p.generate(generator, toy);" },
 				{ title 	  : "Prepend/append generators",
 				  input		  : "var toy = {\n" +
 								"  name : 'Woody',\n" +
@@ -71,11 +71,11 @@
 								"  type : 'cowboy'\n" +
 								" };\n\n" +
 								"var generator = {\n" +
-								"  name : prepend('Sheriff '),\n" +
-								"  type : append(' doll'),\n" +
+								"  name : p.prepend('Sheriff '),\n" +
+								"  type : p.append(' doll'),\n" +
 								"  rank : 2\n" +
 								"};\n\n" +
-								"var results = generate(generator, toy);" },
+								"var results = p.generate(generator, toy);" },
 				{ title 	  : "Random generator",
 				  input		  : "var toy = {\n" +
 								"  name : 'Woody',\n" +
@@ -83,22 +83,22 @@
 								"  type : 'cowboy'\n" +
 								" };\n\n" +
 								"var generator = {\n" +
-								"  name : append(random().alpha(5)),\n" +
-								"  rank : random().int(10, 20)\n" +
+								"  name : p.append(p.random().alpha(5)),\n" +
+								"  rank : p.random().int(10, 20)\n" +
 								"};\n\n" +
-								"var results = generate(generator, toy);" },
+								"var results = p.generate(generator, toy);" },
 				{ title 	  : "Name generator with chain",
 				  input		  : "var toy = {\n" +
 								"  name : 'Woody',\n" +
 								"  rank : 1,\n" +
 								"  type : 'cowboy'\n" +
 								" };\n\n" +
-								"var randomName = chain(random().int(), \n" +
-								"  function(i) { return append('-' + i); });\n\n" +
+								"var randomName = p.chain(p.random().int(), \n" +
+								"  function(i) { return p.append('-' + i); });\n\n" +
 								"var generator = {\n" +
-								"  name : repeat(10, randomName)\n" +
+								"  name : p.repeat(10, randomName)\n" +
 								"};\n\n" +
-								"var results = generate(generator, toy);" },
+								"var results = p.generate(generator, toy);" },
 				{ title 	  : "Dictionary example",
 				  input		  : "var toy = {\n" +
 								"  name : 'Woody',\n" +
@@ -106,12 +106,12 @@
 								"  type : 'cowboy'\n" +
 								" };\n\n" +
 								"var generator = {\n" +
-								"  name : names.list(10),\n" +
-								"  type : dictionary(['cowboy?',\n" + 
-								"                     'action figure?',\n" +
-								"                     'Army men?']).element()\n" +
+								"  name : p.names.list(10),\n" +
+								"  type : p.dictionary(['cowboy?',\n" + 
+								"                       'action figure?',\n" +
+								"                       'Army men?']).element()\n" +
 								"};\n\n" +
-								"var results = generate(generator, toy);" },
+								"var results = p.generate(generator, toy);" },
 				{ title 	  : "Cascading generators",
 				  input		  : "var toy = {\n" +
 								"  who  : {\n" +
@@ -122,11 +122,11 @@
 								" };\n\n" +
 								"var generator = {\n" +
 								"  who  : {\n" + 
-								"           name : list('Woody', 'Buzz', 'Slinky')\n" +
+								"           name : p.list('Woody', 'Buzz', 'Slinky')\n" +
 								"         },\n" +
-								"  rank : range(2, 4)\n" +
+								"  rank : p.range(2, 4)\n" +
 								"};\n\n" +
-								"var results = generate(generator, toy);" },
+								"var results = p.generate(generator, toy);" },
 				{ title 	  : "Variables and state",
 				  input		  : "var toy = {\n" +
 								"  name : 'Woody',\n" +
@@ -134,14 +134,14 @@
 								"  type : 'cowboy'\n" +
 								" };\n\n" +
 								"var generator = {\n" +
-								"  rank : setVar('rank', random().int(1,5)),\n" +
-								"  name : withVar('rank', function(r) { return append('-' + r); }),\n" +
-								"  type : withState(function(s) { return append(s.type + ' '); })\n" +
+								"  rank : p.setVar('rank', p.random().int(1,5)),\n" +
+								"  name : p.withVar('rank', function(r) { return p.append('-' + r); }),\n" +
+								"  type : p.withState(function(s) { return p.append(s.type + ' '); })\n" +
 								"};\n\n" +
 								"var state = { \n" +
 								"  type : ' doll' \n" +
 								"};\n\n" +
-								"var results = generate(generator, toy, state);" }
+								"var results = p.generate(generator, toy, state);" }
 			];
 
 			var run_generator = function(input) {
@@ -155,14 +155,14 @@
 				error.text("");
 
 				// validate input
-				//try {
-				  with(Popcorn.All) {
+				try {
+				with({ p: Popcorn.All }) {
 					eval(input);
 				  }
-				//} catch(e) {
-				//	error.text(e.toString());
-				//	return;
-				//}
+				} catch(e) {
+					error.text(e.toString());
+					return;
+				}
 
 				if (results === undefined) {
 					error.text("Missing 'results = generate(...)' call!");
@@ -244,11 +244,11 @@ var toy = {
  };
 
 var generator = {
-  name : list('Woody', 'Buzz', 'Slinky'),
-  rank : range(2, 4)
+  name : p.list('Woody', 'Buzz', 'Slinky'),
+  rank : p.range(2, 4)
 };
 
-var results = generate(generator, toy);
+var results = p.generate(generator, toy);
 </textarea>
 
 					<div><a href="javascript:;" onclick="run_generator($('#input').val())">Generate objects</a></div>

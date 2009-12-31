@@ -13,7 +13,7 @@
  * and generators together. Just load all project JavaScript
  * files and use as:
  * <pre>
- *   with(Popcorn.All) {
+ *   with({ p: Popcorn.All }) {
  *     <i>... your generator code ...</i>
  *   }
  * </pre>

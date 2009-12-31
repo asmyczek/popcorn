@@ -32,8 +32,8 @@ For example:
 
 <pre><code>
 	// Load modules containing generators used in this scope.
-	with(Popcorn.Core) { 
-	with(Popcorn.Common) {   
+	with({ core: Popcorn.Core }) { 
+	with({ comm: Popcorn.Common }) {   
 
 		var base_object = { // Define the base test case object.
 			id   : 1, 
@@ -41,11 +41,11 @@ For example:
 		};
 
 		var generator = { // Define the generator object. 
-			name : list('Buzz', 'Slinky') // Alter only the name attribute.
+			name : comm.list('Buzz', 'Slinky') // Alter only the name attribute.
 		};
 
 		// And run...
-		var results = generate(generator, base_object);
+		var results = core.generate(generator, base_object);
 
 	} }
 </code></pre>
