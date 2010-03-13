@@ -79,6 +79,21 @@ Popcorn.Dictionary = function (core) {
       element : function(rand) { 
                  var r = rand || core.random();
                  return core.lazy(function() { return r.element(dict); }); 
+               },
+
+      /**
+       * 'elements' returns n random dictionary element.
+       *
+       * @function {generator} elements
+       * @param {random} n    - element count to generate
+       * @param {random} rand - optional a random generator 'random()'.
+       * 
+       * @see Popcorn.Core.random
+       */
+      elements : function(n, rand) { 
+                 var c = n || 5,
+                     r = rand || core.random();
+                 return core.repeat(c, r.element(dict)); 
                }
 
     };
@@ -107,10 +122,29 @@ Popcorn.Dictionary = function (core) {
    *
    * @function {generator} loremIpsum
    * @param {integer} n - optional length of the generated lorem ipsum content.
+   * @param {integer} m - optional min/max length randomly chosen. 
    */
   var loremIpsum = lib.loremIpsum = function(n) {
     var l = n || lorem_ipsum.length;
     return core.gen(lorem_ipsum.slice(0, l).join(" "));
+  };
+
+  /** 
+   * Random length lorem ipsum generator.
+   *
+   * @function {generator[int]} loremIpsum
+   * @paramset No arguments - generates a range from 0 to lorem ipsum length
+   * @paramset One int argument - generates a range from 0 to lorem ipsum length.
+   * @param {integer} max - range max value.
+   * @paramset two int arguments - from-to range.
+   * @param {integer} min - from integer
+   * @param {integer} max - to integer
+   *
+   * @see Popcorn.Core.random
+   */
+  core.RandomLib.loremIpsum = function() {
+    var mm  = core.args2range(arguments, 0, lorem_ipsum.length);
+    return core.gen(lorem_ipsum.slice(mm[0], mm[0] + this.int(mm[0], mm[1])().result).join(" "));
   };
 
   return lib;

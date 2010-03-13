@@ -600,6 +600,7 @@ Popcorn.Core = function (utils) {
         for(var i = 0, l = gs.length; i < l; i++) {
           var gr = gs[i](o[name], ns);
           ns = gr.state;
+
           // Mutate on an array
           if (utils.isArray(gr.result)) {
             for (var j = 0, jl = gr.result.length; j < jl; j++) {
@@ -608,7 +609,19 @@ Popcorn.Core = function (utils) {
               n[name] = gr.result[j];
               r.push(n);
             }
-          // Mutate on an object
+
+          // Mutate on a group generator
+          } else if (utils.isObject(gr.result) && (gr.result._array_result === true)) {
+            var ogr = (utils.isArray(gr.result._generator))?
+                seq(gr.result._generator, cConcat)(o[name], ns) :
+                gr.result._generator(o[name], ns);
+            ns = ogr.state;
+            O.prototype = o;
+            n = new O();
+            n[name] = ogr.result;
+            r.push(n);
+
+          // Mutate on an inner-object
           } else if (utils.isObject(gr.result)) {
             var ogr = generateWithState(gr.result, o[name], ns);
             ns = ogr.state;
@@ -618,6 +631,7 @@ Popcorn.Core = function (utils) {
               n[name] = ogr.result[k];
               r.push(n);
             }
+
           // All other values
           } else {
             n = new O();
@@ -828,6 +842,17 @@ Popcorn.Core = function (utils) {
       return f(s)(o, s);
     };
   }; 
+
+  /**
+   * Group generator results into array
+   *
+   * @function {generator} array
+   * @param {function} g - the generator to wrap
+   */
+  // A work-around for not supporting seq-monad yet!
+  var array = lib.array = function(g) {
+      return lib.gen({ _array_result : true, _generator : g });
+  };
 
   // ------ Core random generators ------
 

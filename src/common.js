@@ -262,6 +262,24 @@ Popcorn.Common = function (core) {
     return date(new Date(), format);
   };
 
+  /**
+   * Generates a random date
+   *
+   * @function {generator} date
+   * @prarm {milisec} from - from date 
+   * @prarm {milisec} to   - to date 
+   * @param {string} format - the output format, possible values are: date, hours, minutes, seconds, time, gmt.
+   * By default data prints the local time string.
+   *
+   * @see Popcorn.Common.date
+   */
+  core.RandomLib.date = function(from, to, format) {
+    var f = from || new Date(0),
+        t = to   || new Date(99999999999999);
+        r = this;
+    return core.lazy(function() { return lib.date(new Date(r.int(f.getTime(), t.getTime())().result), format); });
+  };
+
   return lib;
 
 }(Popcorn.Core);
