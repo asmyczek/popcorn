@@ -32,8 +32,7 @@ For example:
 
 <pre><code>
 	// Load modules containing generators used in this scope.
-	with({ core: Popcorn.Core }) { 
-	with({ comm: Popcorn.Common }) {   
+	with({ core: Popcorn.Core, comm: Popcorn.Common }) { 
 
 		var base_object = { // Define the base test case object.
 			id   : 1, 
@@ -47,7 +46,7 @@ For example:
 		// And run...
 		var results = core.generate(generator, base_object);
 
-	} }
+	}
 </code></pre>
 
 ## Generators 101
@@ -129,7 +128,8 @@ as argument.
 The random generator functions provided by the Core modules are:
 
   - `int()` - range function that returns an integer in a defined rage.
-  - `element()` - picks one random element from the provided array.
+  - `element()` - picks one random element from the provided array or
+  - `elements()` - picks n random elements.
 
 For example:
 

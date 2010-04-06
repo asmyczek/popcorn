@@ -21,6 +21,7 @@
             assertGen(repeat(3, 'a'), null, ['a','a','a'], "repeat(value)");
             assertGen(repeat(3, gen('a')), null, ['a','a','a'], "repeat(function)");
             assertGen(repeat(3, [gen('a')]), null, ['a','a','a'], "repeat(array)");
+		  	assert(generate(array(repeat(3, 'a')), {}), [['a','a','a']], "array()");
           }
 		</script>
 		</p>

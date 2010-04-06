@@ -16,6 +16,7 @@
           with(Popcorn.Core) {
           with(Popcorn.Common) {
             var dnow = new Date();
+            assertGen(concat('a', gen('b'), 'c'), null, 'abc', "concat()");
             assertGen(range(1,5), null, [1,2,3,4,5], "range()");
             assertGen(list('a','b','c'), null, ['a','b','c'], "list()");
             assertGen(list(['a','b'],'c'), null, ['a','b','c'], "list(array)");

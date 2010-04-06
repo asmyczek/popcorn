@@ -14,8 +14,8 @@
  * 
  * Quick start:
  * <pre><code>
- * with({ core: Popcorn.Core }) {
- * with({ comm: Popcorn.Common }) { // Load other modules as needed.
+ * with({ core: Popcorn.Core, 
+ *        comm: Popcorn.Common }) { // Load other modules as needed.
  *
  *   var base_object = { // Define the base object.
  *     id : 1, 
@@ -29,7 +29,7 @@
  * 
  *   // And run it!
  *   var results = core.generate(generator, base_object);
- * }}
+ * }
  * </code></pre>
  *
  * @project Popcorn

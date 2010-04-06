@@ -414,7 +414,7 @@ Popcorn.Core = function (utils) {
    * and the result of the current generator evaluation. <br/>
    * For example:
    * <pre>
-   *   var g = seq(gen('a'), gen('b'), gen('c'), cJoin, 0);
+   *   var g = seq([gen('a'), gen('b'), gen('c')], cJoin, 0);
    *   g('any input') will return 'abc'.
    * </pre>
    *
@@ -613,12 +613,13 @@ Popcorn.Core = function (utils) {
           // Mutate on a group generator
           } else if (utils.isObject(gr.result) && (gr.result._array_result === true)) {
             var ogr = (utils.isArray(gr.result._generator))?
-                seq(gr.result._generator, cConcat)(o[name], ns) :
-                gr.result._generator(o[name], ns);
+                  seq(gr.result._generator, cConcat)(o[name], ns) :
+                  gr.result._generator(o[name], ns);
             ns = ogr.state;
             O.prototype = o;
             n = new O();
             n[name] = ogr.result;
+            if (gr.result._join_result === true) n[name] = n[name].join();
             r.push(n);
 
           // Mutate on an inner-object
@@ -851,7 +852,7 @@ Popcorn.Core = function (utils) {
    */
   // A work-around for not supporting seq-monad yet!
   var array = lib.array = function(g) {
-      return lib.gen({ _array_result : true, _generator : g });
+      return gen({ _array_result : true, _generator : g });
   };
 
   // ------ Core random generators ------

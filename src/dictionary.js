@@ -85,7 +85,7 @@ Popcorn.Dictionary = function (core) {
        * 'elements' returns n random dictionary element.
        *
        * @function {generator} elements
-       * @param {random} n    - element count to generate
+       * @param {integer} n    - element count to generate
        * @param {random} rand - optional a random generator 'random()'.
        * 
        * @see Popcorn.Core.random

@@ -19,6 +19,23 @@ Popcorn.Common = function (core) {
   var alpha_num = alpha + digit;
 
   /**
+   * Concats arguments (primitives single result generators)
+   * into one string. 
+   *
+   * @function {generator[string]} range
+   * @param {[generator/primitives]} value - single value
+   * generators or primitives to concatenate. 
+   */
+  var concat = lib.concat = function() {
+    var args = core.args2array(arguments), gs = [], v;
+    for (var i = 0, l = args.length; i < l; i++) {
+      v = args[i];
+      gs[i] = core.isFunction(v)? v : core.gen(v);
+    }
+    return core.seq(gs, core.cJoin, "");
+  };
+
+  /**
    * 'range' generator creates a list of integer generators
    * in the range from min to max. This is a range function
    * and accepts no arguments, or one or two integer arguments. 
