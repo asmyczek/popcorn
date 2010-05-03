@@ -347,7 +347,21 @@ Popcorn.Core = function (utils) {
   // This package object extends utils.
   var lib = utils.clone(utils);
 
+  // Object Generation mode
+  var MODE_PERMUTATE = 'mode_permutate';
+
   // ------ Basic operators ------
+
+  /**
+   * Identity
+   *
+   * @function {any} id
+   * @param {any} value - any value
+   * @return the value
+   */
+  var id = lib.id = function (v) { 
+    return v;
+  };
 
   /**
    * 'gen' creates a generator that returns the argument value 'v' 
@@ -574,70 +588,54 @@ Popcorn.Core = function (utils) {
     return seq(gs, function(r, n) { return r || n; }); 
   };
 
-  // New object constructor function used for object
-  // 'mutate' and 'permutate' functions.
-  var O = function() {};
-
   /**
-   * 'mutate' executes generators 'gs' on an object property
-   * of name 'name'. The result is an array that contains
-   * one result object for every generator result value.<br/>
+   * 'mutate' executes generators 'gs' on the input object o.
    * For example:
    * <pre>
-   *   var o = { name: 'Woody', age:2 };
-   *   mutate('name', [gen('Buzz'), gen('Woody')](o) will return 
-   *   the object array [{ name:'Buzz', age:2 }, { name:'Woody', age:2 }]
+   *   mutate([gen('Buzz'), gen('Woody')](o) will return 
+   *   ['Buzz', 'Woody']
    * </pre>
-   *
    * @function {generator} mutate
-   * @param {string} name - object property name.
    * @param {generator[]} gs - {@link generator} array.
    */
-  var mutate = lib.mutate = function(name, gs) {
+  var mutate = lib.mutate = function(gs) {
     return function(o, s) {
       if (gs.length > 0) {
-        var r = [], ns = s, n;
+        var r = [], ns = s;
         for(var i = 0, l = gs.length; i < l; i++) {
-          var gr = gs[i](o[name], ns);
+          var gr = gs[i](o, ns);
           ns = gr.state;
 
           // Mutate on an array
           if (utils.isArray(gr.result)) {
             for (var j = 0, jl = gr.result.length; j < jl; j++) {
-              O.prototype = o;
-              n = new O();
-              n[name] = gr.result[j];
-              r.push(n);
+              r.push(gr.result[j]);
             }
 
           // Mutate on a group generator
           } else if (utils.isObject(gr.result) && (gr.result._array_result === true)) {
             var ogr = (utils.isArray(gr.result._generator))?
-                  seq(gr.result._generator, cConcat)(o[name], ns) :
-                  gr.result._generator(o[name], ns);
+                  seq(gr.result._generator, cConcat)(o, ns) :
+                  gr.result._generator(o, ns);
             ns = ogr.state;
-            O.prototype = o;
-            n = new O();
-            n[name] = ogr.result;
-            if (gr.result._join_result === true) n[name] = n[name].join();
-            r.push(n);
+            r.push((gr.result._join_result === true)? ogr.result : ogr.result.join());
 
           // Mutate on an inner-object
+          // TODO currently supported for permutation only
           } else if (utils.isObject(gr.result)) {
-            var ogr = generateWithState(gr.result, o[name], ns);
-            ns = ogr.state;
-            for (var k = 0, kl = ogr.result.length; k < kl; k++) {
-              O.prototype = o;
-              n = new O();
-              n[name] = ogr.result[k];
-              r.push(n);
+            if (MODE_PERMUTATE === ns._generation_mode) {
+              var ogr = permutate(gr.result, o, ns, id);
+              ns = ogr.state;
+              for (var k = 0, kl = ogr.result.length; k < kl; k++) {
+                r.push(ogr.result[k]);
+              }
+            } else {
+                r.push(gr.result);
             }
 
           // All other values
           } else {
-            n = new O();
-            n[name] = gr.result;
-            r.push(n);
+            r.push(gr.result);
           }
         };
         return { result: r, state: ns };
@@ -646,53 +644,52 @@ Popcorn.Core = function (utils) {
     };
   };
 
+  // New object constructor function used for object
+  // 'mutateOnAttribute' and 'permutate' functions.
+  var O = function() {};
+
   /**
-   * 'permutate' applies every generator on all
-   * results from previous generator executions 
-   * beginning with the input object. See examples 
-   * for details.
+   * 'mutateOnAttribute' executes generators 'gs' on an object property
+   * of name 'name'. The result is an array that contains
+   * one result object for every generator result value.<br/>
+   * For example:
+   * <pre>
+   *   var o = { name: 'Woody', age:2 };
+   *   mutateOnAttribute('name', [gen('Buzz'), gen('Woody')](o) will return 
+   *   the object array [{ name:'Buzz', age:2 }, { name:'Woody', age:2 }]
+   * </pre>
    *
-   * @function {generator} permutate
+   * @function {generator} mutateOnAttribute
+   * @param {string} name - object property name.
    * @param {generator[]} gs - {@link generator} array.
    */
-  var permutate = lib.permutate = function(gs) {
-
-    // Recursive permutate helper applies 
-    // generator 'g' on all objects 'os'.
-    var per_impl = function(g, os, s) {
-      var rs = [], rr, ns = s, r;
-      for (var i = 0, l = os.length; i < l; i++) {
-        O.prototype = os[i];
-        r = g(new O(), ns);
-        ns = r.state;
-        rs.push.apply(rs, r.result);
-      }
-      return { result: rs, state: ns };
-    };
-
+  var mutateOnAttribute = function(name, gs) {
     return function(o, s) {
       if (gs.length > 0) {
-        var rs = [o], ns = s, r;
-        for (var i = 0, l = gs.length; i < l; i++) {
-          r = per_impl(gs[i], rs, ns);
-          ns = r.state;
-          rs = r.result;
+        var gr = mutate(gs)(o[name], s),
+            rs = gr.result,
+            r = [], n;
+        for (var j = 0, jl = rs.length; j < jl; j++) {
+          O.prototype = o;
+          n = new O();
+          n[name] = rs[j];
+          r.push(n);
         }
-        return { result: rs, state: ns };
+        return { result: r, state: gr.state };
       }
       return { result: [o], state: s };
     };
   };
 
   /** 
-   * Main object generator execution function.
-   * 'generate' executes the argument object generator 
-   * 'gen' on the base test case 'base' and returns the 
+   * 'permutate' executes the argument object generator 
+   * 'gen' on the defaults object 'base' and returns the 
    * resulting object array.<br/>
-   * For example: 
+   * This generation method permutates over all results
+   * of all attribute generator, for example: 
    * <pre>
    *   var base = { name: 'Woody', age:2 }; 
-   *   var gen  = { name: list('Buzz', 'Slinky'), age:range(2,4) }; 
+   *   var gen  = { name: list('Buzz', 'Slinky'), age: range(2,4) }; 
    *   generate(gen, base) will return the array: 
    *    [{ name: 'Buzz',   age: 2 },
    *     { name: 'Buzz',   age: 3 }, 
@@ -707,46 +704,74 @@ Popcorn.Core = function (utils) {
    * @param {object} base - the base test case object.
    * @param {object} state - an optional state object that
    *    can be read and manipulated by any generator.
+   * @param {function} result_transformer - an optional function
+   *   which takes the result generator object { result:r, state:s }
+   *   as argument. If not specified, the default transformer
+   *   returns the object result. To return the result and state use 
+   *   'id' function.
    */
-  var generate = lib.generate = function(generator, base, state) {
-    return generateWithState(generator, base, state).result;
-  };
+  var permutate = lib.permutate = function(generator, base, state, result_transformer) {
 
-  /**
-   * Same as {@link generate} but returns the generator result object:
-   *
-   * <pre><code>
-   *   {
-   *     result: value,    // generator result
-   *     state : state_obj // state object passed to the generate function
-   *   }
-   * </code></pre>
-   *
-   * This function may become handy if the generators
-   * manipulate the state object, for example to accumulate statistics
-   * that need to be accessed after the generation process finished.
-   */
-  var generateWithState = lib.generateWithState = function(generator, base, state) {
+    // Recursive permutate helper applies 
+    // generator 'g' on all objects 'os'.
+    var perm_rec = function(g, os, s) {
+      var rs = [], rr, ns = s, r;
+      for (var i = 0, l = os.length; i < l; i++) {
+        O.prototype = os[i];
+        r = g(new O(), ns);
+        ns = r.state;
+        rs.push.apply(rs, r.result);
+      }
+      return { result: rs, state: ns };
+    };
+
+    // Permutate generator
+    var perm_gen = function(o, s) {
+      if (gs.length > 0) {
+        var rs = [o], ns = s, r;
+        for (var i = 0, l = gs.length; i < l; i++) {
+          r = perm_rec(gs[i], rs, ns);
+          ns = r.state;
+          rs = r.result;
+        }
+        return { result: rs, state: ns };
+      }
+      return { result: [o], state: s };
+    };
+
+    // Generation
     var s = state || {};
     var v, prop, gs = [];
+    var rt = result_transformer || function(r) { return r.result; };
+    s._generation_mode = MODE_PERMUTATE;
+
     for (var name in generator) {
       v     = generator[name];
 
       // Handle arrays
       if (utils.isArray(v)) {
-        gs.push(mutate(name, v));
+        gs.push(mutateOnAttribute(name, v));
 
       // Handle functions
       } else if (utils.isFunction(v)) {
-        gs.push(mutate(name, [v]));
+        gs.push(mutateOnAttribute(name, [v]));
 
       // and everything else
       } else {
-        gs.push(mutate(name, [gen(v)]));
+        gs.push(mutateOnAttribute(name, [gen(v)]));
       }
     }
 
-    return permutate(gs)(base, s);
+    return rt(perm_gen(base, s));
+
+  };
+
+  /**
+   * Equivalent to 'permutate'.
+   * @Deprecated
+   */
+  var generate = lib.generate = function(generator, base, state, result_transformer) {
+    return permutate(generator, base, state, result_transformer);
   };
 
   // ------ State and variables ------
