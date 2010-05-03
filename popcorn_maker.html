@@ -63,7 +63,8 @@
 								"  name : p.list('Woody', 'Buzz', 'Slinky'),\n" +
 								"  rank : p.range(2, 4)\n" +
 								"};\n\n" +
-								"var results = p.permutate(generator, toy);" },
+								"var results = p.permutate(generator, toy);\n" +
+								"// var results = p.circulate(generator, toy);" },
 				{ title 	  : "Prepend/append generators",
 				  input		  : "var toy = {\n" +
 								"  name : 'Woody',\n" +
@@ -75,7 +76,8 @@
 								"  type : p.append(' doll'),\n" +
 								"  rank : 2\n" +
 								"};\n\n" +
-								"var results = p.permutate(generator, toy);" },
+								"var results = p.permutate(generator, toy);\n" +
+								"// var results = p.circulate(generator, toy);" },
 				{ title 	  : "Random generator",
 				  input		  : "var toy = {\n" +
 								"  name : 'Woody',\n" +
@@ -86,7 +88,8 @@
 								"  name : p.append(p.random().alpha(5)),\n" +
 								"  rank : p.random().int(10, 20)\n" +
 								"};\n\n" +
-								"var results = p.permutate(generator, toy);" },
+								"var results = p.permutate(generator, toy);\n" +
+								"// var results = p.circulate(generator, toy);" },
 				{ title 	  : "Name generator with chain",
 				  input		  : "var toy = {\n" +
 								"  name : 'Woody',\n" +
@@ -98,7 +101,8 @@
 								"var generator = {\n" +
 								"  name : p.repeat(10, randomName)\n" +
 								"};\n\n" +
-								"var results = p.permutate(generator, toy);" },
+								"var results = p.permutate(generator, toy);\n" +
+								"// var results = p.circulate(generator, toy);" },
 				{ title 	  : "Dictionary example",
 				  input		  : "var toy = {\n" +
 								"  name : 'Woody',\n" +
@@ -111,7 +115,8 @@
 								"                       'action figure?',\n" +
 								"                       'Army men?']).element()\n" +
 								"};\n\n" +
-								"var results = p.permutate(generator, toy);" },
+								"var results = p.permutate(generator, toy);\n" +
+								"// var results = p.circulate(generator, toy);" },
 				{ title 	  : "Cascading generators",
 				  input		  : "var toy = {\n" +
 								"  who  : {\n" +
@@ -126,7 +131,8 @@
 								"         },\n" +
 								"  rank : p.range(2, 4)\n" +
 								"};\n\n" +
-								"var results = p.permutate(generator, toy);" },
+								"var results = p.permutate(generator, toy);\n" +
+								"// var results = p.circulate(generator, toy);" },
 				{ title 	  : "Variables and state",
 				  input		  : "var toy = {\n" +
 								"  name : 'Woody',\n" +
@@ -141,7 +147,8 @@
 								"var state = { \n" +
 								"  type : ' doll' \n" +
 								"};\n\n" +
-								"var results = p.permutate(generator, toy, state);" }
+								"var results = p.permutate(generator, toy, state);\n" +
+								"// var results = p.circulate(generator, toy, -1, state);" }
 			];
 
 			var run_generator = function(input) {
@@ -249,6 +256,7 @@ var generator = {
 };
 
 var results = p.permutate(generator, toy);
+// var results = p.circulate(generator, toy);
 </textarea>
 
 					<div><a href="javascript:;" onclick="run_generator($('#input').val())">Generate objects</a></div>

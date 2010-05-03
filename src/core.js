@@ -349,6 +349,7 @@ Popcorn.Core = function (utils) {
 
   // Object Generation mode
   var MODE_PERMUTATE = 'mode_permutate';
+  var MODE_CIRCULATE = 'mode_circulate';
 
   // ------ Basic operators ------
 
@@ -681,6 +682,25 @@ Popcorn.Core = function (utils) {
     };
   };
 
+  /**
+   * Internal function used for mutate,
+   * wrappes a value into generator array.
+   *
+   * @function {generator[]} toGenArray
+   * @param {value/generator/[generator]} value
+   */
+  var toGenArray = function(v) {
+    if (utils.isArray(v)) {
+      return v;
+    } else if (utils.isFunction(v)) {
+      return [v];
+    } else {
+      return [gen(v)];
+    }
+  };
+
+  // ------  ------
+
   /** 
    * 'permutate' executes the argument object generator 
    * 'gen' on the defaults object 'base' and returns the 
@@ -715,10 +735,12 @@ Popcorn.Core = function (utils) {
     // Recursive permutate helper applies 
     // generator 'g' on all objects 'os'.
     var perm_rec = function(g, os, s) {
-      var rs = [], rr, ns = s, r;
+      var rs = [], rr, ns = s, r, o;
       for (var i = 0, l = os.length; i < l; i++) {
         O.prototype = os[i];
-        r = g(new O(), ns);
+        o = new O();
+        s._result_object = o;
+        r = g(o, ns);
         ns = r.state;
         rs.push.apply(rs, r.result);
       }
@@ -741,29 +763,67 @@ Popcorn.Core = function (utils) {
 
     // Generation
     var s = state || {};
-    var v, prop, gs = [];
     var rt = result_transformer || function(r) { return r.result; };
+    var gs = [];
     s._generation_mode = MODE_PERMUTATE;
 
     for (var name in generator) {
-      v     = generator[name];
-
-      // Handle arrays
-      if (utils.isArray(v)) {
-        gs.push(mutateOnAttribute(name, v));
-
-      // Handle functions
-      } else if (utils.isFunction(v)) {
-        gs.push(mutateOnAttribute(name, [v]));
-
-      // and everything else
-      } else {
-        gs.push(mutateOnAttribute(name, [gen(v)]));
-      }
+      gs.push(mutateOnAttribute(name, toGenArray(generator[name])));
     }
 
     return rt(perm_gen(base, s));
+  };
 
+
+  /**
+   * 'circulate'
+   */
+  var circulate = lib.circulate = function(generator, base, count, state, result_transformer) {
+    var s = state || {};
+    var c = count || -1;
+    var rt = result_transformer || function(r) { return r.result; };
+    s._generation_mode = MODE_CIRCULATE;
+    s._result_object = base;
+
+    var gs = {}, gr = {}, r, o, max = 0, rs = [];
+
+    // Initialize
+    for (var name in generator) {
+      gs[name] = mutate(toGenArray(generator[name]));
+      r = gs[name](base[name], s);
+      if (r.result.length > max) max = r.result.length;
+      gr[name] = []; 
+    }
+
+    // Generate
+    max = (c < 0)? max : c;
+    while(max > 0) {
+      max--;
+      O.prototype = base;
+      o = new O();
+      s._result_object = o;
+      for (var name in generator) {
+        if (gr[name].length === 0) {
+          r = gs[name](base[name], s);
+          gr[name] = r.result; 
+          s = r.state;
+        }
+        o[name] = gr[name].shift();
+      };
+      rs.push(o);
+    };
+
+    return rt({ result : rs, state : s});
+  };
+
+  /**
+   * Generator that provides access to current
+   * generated object. It's experimental right now.
+   */
+  var current = lib.current = function(f) {
+    return function(o, s) {
+      return { result : f(s._result_object), state : s };
+    };
   };
 
   /**
@@ -1008,5 +1068,4 @@ Popcorn.Core = function (utils) {
   return lib;
 
 }(Popcorn.Utils);
-
 
