@@ -625,7 +625,7 @@ Popcorn.Core = function (utils) {
           // TODO currently supported for permutation only
           } else if (utils.isObject(gr.result)) {
             if (MODE_PERMUTATE === ns._generation_mode) {
-              var ogr = permutate(gr.result, o, ns, id);
+              var ogr = permutate(gr.result, o, -1, ns, id);
               ns = ogr.state;
               for (var k = 0, kl = ogr.result.length; k < kl; k++) {
                 r.push(ogr.result[k]);
@@ -730,7 +730,12 @@ Popcorn.Core = function (utils) {
    *   returns the object result. To return the result and state use 
    *   'id' function.
    */
-  var permutate = lib.permutate = function(generator, base, state, result_transformer) {
+  var permutate = lib.permutate = function(generator, base, count, state, result_transformer) {
+    var s = state || {};
+    var c = count || -1;
+    var rt = result_transformer || function(r) { return r.result; };
+    var gs = [], rs = [], r;
+    s._generation_mode = MODE_PERMUTATE;
 
     // Recursive permutate helper applies 
     // generator 'g' on all objects 'os'.
@@ -762,16 +767,27 @@ Popcorn.Core = function (utils) {
     };
 
     // Generation
-    var s = state || {};
-    var rt = result_transformer || function(r) { return r.result; };
-    var gs = [];
-    s._generation_mode = MODE_PERMUTATE;
-
     for (var name in generator) {
       gs.push(mutateOnAttribute(name, toGenArray(generator[name])));
     }
 
-    return rt(perm_gen(base, s));
+    // TODO: move count logic into the permutate generator
+    // XXX: state does not match the result of the last run
+    //      if n x run > count !!!
+    var done = false;
+    while(!done) {
+      r = perm_gen(base, s);
+      rs = rs.concat(r.result);
+      s = r.state;
+      if (c < 0) {
+        done = true;
+      } else if (rs.length > c) {
+        rs = rs.slice(0, c);
+        done = true;
+      }
+    }
+
+    return rt({ result : rs, state : s });
   };
 
 
@@ -813,7 +829,7 @@ Popcorn.Core = function (utils) {
       rs.push(o);
     };
 
-    return rt({ result : rs, state : s});
+    return rt({ result : rs, state : s });
   };
 
   /**
@@ -831,7 +847,7 @@ Popcorn.Core = function (utils) {
    * @Deprecated
    */
   var generate = lib.generate = function(generator, base, state, result_transformer) {
-    return permutate(generator, base, state, result_transformer);
+    return permutate(generator, base, -1, state, result_transformer);
   };
 
   // ------ State and variables ------
