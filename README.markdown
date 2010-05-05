@@ -1,5 +1,5 @@
-Popcorn - a DSL for JSON
-========================
+Popcorn - the JSON fuzzer
+=========================
 
 ## Description
 
@@ -15,18 +15,19 @@ or browser side JavaScript code. Since using this DSL thousands of test cases
 can be expressed in just few lines of code, it makes for a great driver for
 data driven test engines.
 
-For a quick overview see [Popcorn - Data Driven Testing with JSON](http://labs.mudynamics.com/2009/10/26/popcorn-data-driven-testing-with-json/) and try [popcorn maker](http://labs.mudynamics.com/wp-content/uploads/2009/10/popcorn_maker.html).
+For a quick overview
+see [Popcorn - Data Driven Testing with JSON](http://labs.mudynamics.com/2009/10/26/popcorn-data-driven-testing-with-json/)
+and try [popcorn maker](http://mu-labs.googlecode.com/svn/trunk/eng/tools/popcorn/popcorn_maker.html).
 
 ## Getting started
 
 The library consists of several independent loadable modules build on
-top of the Core module. You can load only the modules you like to use 
-or module All that combines all generators together.
-To setup the generator:
+top of the Core framework. To setup the generator:
 
-  1. Define the base test case JSON object.
-  2. Define the generator object and assign generators to attributes you like to alter.
-  3. Run the `generate` function on the generator and base object.
+  1. Load only the required modules or module All.
+  2. Define the base test case JSON object.
+  3. Define the generator object and assign generators to attributes you like to alter.
+  4. Run the `permutate` or `circulate` function on the generator and base object.
 
 For example:
 
@@ -44,69 +45,70 @@ For example:
 		};
 
 		// And run...
-		var results = core.generate(generator, base_object);
+		var results = core.permutate(generator, base_object);
 
 	}
 </code></pre>
 
 ## Generators 101
 
-In the basics, generators are functions that take one argument and return
-a result value and an optional state. The Core module function `gen()` 
-creates the most basic generator that returns the argument value passed to 
-`gen()` ignoring the argument the generator itself is called with:
+In the basics, generators are functions that take one argument value 
+and return a result value with an optional state. The Core module function
+`gen()` creates the most basic generator. It returns the value
+passed to `gen()` when executed. It can be sees as an generator
+constructor that wraps any value into a generator.
 
-<pre><core>
+<pre><code>
 	var g = gen('test'); // Create a generator g with value 'test'.
 	g('any input')       // Execute the generator g. The result is 'test'.
-</core></pre>
+</code></pre>
 
-In comparison with `gen()`, `prepend()` uses the input value, for example:
+In comparison with `gen()`, `prepend()` uses the input value:
 
-<pre><core>
+<pre><code>
 	var p = prepend('Hello ');
 	p('world'); // returns 'Hello world'
 	p('Buzz'); // returns 'Hello Buzz', etc.
-</core></pre>
+</code></pre>
 
 Some generators accept other generators or generator arrays as argument.
 For example `append(g)` executes the generator `g` and appends the
 result to the input value:
 
-<pre><core>
+<pre><code>
 	var r = random().int(), // See next section for random generators.
 	    a = append(r);
 	    a('user'); // Will return for example 'user42' or 'user573' etc.
-</core></pre>
+</code></pre>
 
-If you like to pass a generated value to another generator that does not 
-accept a generator as argument, use `chain()` function to execute these
-generators in sequence. For example to build random user names of the 
-form '<user>-<random int>' you can define a generator as following:
+Generator `chain()` can be used to execute generators in sequence.
+For example a generator for random user names of the form '<user>-<random int>'
+can be define as following:
 
-<pre><core>
+<pre><code>
 	var r = random().int(),
 	    u = chain(r, function(i) { return append('-' + i); });
 	    u('admin'); // Will return for example 'admin-385' or 'admin-712', etc.
-</core></pre>
+</code></pre>
 
 `chain()` takes the random generator and a function as argument. It executes 
 the generator and passes the result to the function that returns a new generator 
-as result. `chain()` always has to return another generator. This way it can
-be evaluated or chained again to build new generators.
+as result. `chain()` always has to return another generator, so it can be 
+chained with another generator or just evaluated.
 
 The previous example seems to be quite useful already. We can extract it
-into a separate library and used with any other generator, for example:
+into a separate library and use with any other generator, for example:
 
-<pre><core>
+<pre><code>
 	var randomUser = chain(random().int(), function(i) { return append('-' + i); });
 	repeat(10, randomUser)('user'); // Generates 10 random user names `user-xyz`.
-</core></pre>
+</code></pre>
 
 It is possible to define generators not only on root attributes of an object 
-but on attributes of cascading objects as well, for example:
+but on attributes of inner objects as well (currently supported for `permutate()` only),
+for example:
 
-<pre><core>
+<pre><code>
 var generator = {
 	id   : range(1, 3),
 	name : {
@@ -114,22 +116,22 @@ var generator = {
        last  : 'Toy'
     }
 };
-</core></pre>
+</code></pre>
 
-See 'popcorn_maker.html' and API documentation for more information and 
-the complete generator list.
+Try [popcorn_maker.html](http://mu-labs.googlecode.com/svn/trunk/eng/tools/popcorn/popcorn_maker.html)
+and see [API documentation](http://mu-labs.googlecode.com/svn/trunk/eng/tools/popcorn/docs/api_dev/index.html)
+for more information and the complete generator list.
 
 ## Random generators
 
-The Core module defines a random generator object and a library class that 
-can be extended with custom random generators. The constructor function 
-`random()` creates the random object. It accepts an optional seed value 
-as argument.
+The Core module defines a random generator object and a library class
+which can be extended with custom generators. The constructor function 
+`random()` creates the random generator object. It accepts an optional
+seed value as argument.
 The random generator functions provided by the Core modules are:
 
   - `int()` - range function that returns an integer in a defined rage.
   - `element()` - picks one random element from the provided array or
-  - `elements()` - picks n random elements.
 
 For example:
 
@@ -145,7 +147,8 @@ the generator to the `RandomLib` class defined in Core:
 <pre><code>
 	RandomLib.myRandGenerator = function() {
 		... 
-		// this.int()(); can be used here.
+		// this.int()(); call to core int() generator
+    //               which returns next int value.
 		... 
 	};
 </code></pre>
@@ -159,29 +162,31 @@ See `Common.alpha` or `Network.emailAddress` for more details.
 Module Dictionary provides functions to build dictionaries
 from JavaScript arrays. The constructor function `dictionary()`
 takes an array as argument and returns the dictionary object.
-Currently two generator functions are supported by the dictionary 
+Currently three generator functions are supported by the dictionary 
 object:
 
   - `list()` - a range function which returns all or a subset of elements.
   - `element()` - picks a random dictionary element.
+  - `elements()` - picks n random elements.
 
-Popcorn comes with several default dictionaries for most common
+Popcorn provides several default dictionaries for most common
 names, surnames, passwords, domains etc.
 
 ## State and variables
 
-The generation process maintains a state object that is accessible and
-modifiable by all generators. The `generate()` function takes an optional
-state object as argument. If this is not provided, an empty object is created.
+The generation process maintains a state object which is accessible and
+modifiable by any generator. The `permutate()` and `circulate()` functions
+takes an optional state object as argument. If this is not provided,
+an empty object is created.
 
 To access the state use `withState()` generator, for example:
 
-<pre><core>
+<pre><code>
 var generator = {
 	id  : withState(function(s) { s.id = 1; return gen(s.id); }),
 	user: withState(function(s) { return gen('user-' + s.id); })
 };
-</core></pre>
+</code></pre>
 
 The first generator sets an id attribute on the state object
 and returns a generator for this id. The state object id attribute
@@ -194,12 +199,62 @@ store generator results in variables and access this variables in other
 generators, `setVar()` and `withVar()`. Using these generators,
 the example above could be simplified to:
 
-<pre><core>
+<pre><code>
 var generator = {
 	id  : setVar('id', random().int()),
 	user: withVar('id', function(id) { return gen('user-' + id); })
 };
-</core></pre>
+</code></pre>
+
+## JSON object generators
+
+Popcorn supports two JSON generation functions, `permutate()`
+and `circulate()`. If two or more attribute generators are defined 
+in one object or inner object, `permutate()` will generate object
+with all permutations between the values generated by the attribute
+generators. For example the generator 
+<pre><code>
+var generator = {
+	id  : range(1, 4),
+	user: list('admin', 'guest')
+};
+</code></pre>
+
+will return:
+
+<pre><code>
+[{ id: 1, user: 'admin' },
+ { id: 1, user: 'guest' },
+ { id: 2, user: 'admin' },
+ { id: 2, user: 'guest' },
+ { id: 3, user: 'admin' },
+ { id: 3, user: 'guest' },
+ { id: 4, user: 'admin' },
+ { id: 4, user: 'guest' }]
+</code></pre>
+
+when executed with `permutate()`.
+
+`circulate()` in opposite to `permutate()` combines the results
+of all attribute generators together. `circulate()` for the
+above generator will return:
+
+<pre><code>
+[{ id: 1, user: 'admin' },
+ { id: 2, user: 'guest' },
+ { id: 3, user: 'admin' },
+ { id: 4, user: 'guest' }]
+</code></pre>
+
+If no count is provided, circulate generates an object array
+of the length of the longest attribute generator (here 'id').
+All other attribute values circulate (here 'user').
+
+Additionally to the generator and base object, both functions 
+take an optional result count, a state object and a result transformer
+as argument. By default only the result of the generation is
+returned by these function. Use `id()` as result transformer
+to return the final state as well.
 
 ## Build
 

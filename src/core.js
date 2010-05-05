@@ -683,8 +683,8 @@ Popcorn.Core = function (utils) {
   };
 
   /**
-   * Internal function used for mutate,
-   * wrappes a value into generator array.
+   * Wrappes a value into generator array,
+   * the default input for 'mutate'.
    *
    * @function {generator[]} toGenArray
    * @param {value/generator/[generator]} value
@@ -699,12 +699,13 @@ Popcorn.Core = function (utils) {
     }
   };
 
-  // ------  ------
+  // ------ JSON object generation functions ------
 
   /** 
-   * 'permutate' executes the argument object generator 
-   * 'gen' on the defaults object 'base' and returns the 
-   * resulting object array.<br/>
+   * 'permutate' is one of two supported JSON object
+   * generation functions. It executes the argument 
+   * generator 'gen' on the default object 'base'
+   * and returns the resulting object array.<br/>
    * This generation method permutates over all results
    * of all attribute generator, for example: 
    * <pre>
@@ -719,16 +720,17 @@ Popcorn.Core = function (utils) {
    *     { name: 'Slinky', age: 4 }]
    * </pre>
    *
-   * @function {object[]} generate
+   * @function {object[]} permutate
    * @param {object} gen - the generator object.
    * @param {object} base - the base test case object.
+   * @param {int} count - an optional result count
    * @param {object} state - an optional state object that
    *    can be read and manipulated by any generator.
    * @param {function} result_transformer - an optional function
    *   which takes the result generator object { result:r, state:s }
-   *   as argument. If not specified, the default transformer
-   *   returns the object result. To return the result and state use 
-   *   'id' function.
+   *   as argument and returns the desired result. If not defined, 
+   *   the default transformer returns just the result array. 
+   *   To return the result and state use 'id' function.
    */
   var permutate = lib.permutate = function(generator, base, count, state, result_transformer) {
     var s = state || {};
@@ -790,9 +792,36 @@ Popcorn.Core = function (utils) {
     return rt({ result : rs, state : s });
   };
 
-
   /**
-   * 'circulate'
+   * Same as 'permutate', 'circulate' executes the argument
+   * generator 'gen' on the default object 'base' 
+   * and returns the resulting object array.<br/>
+   * In difference to 'permutate', the results of all
+   * attribute generators are combined together.
+   * If no count is provided, circulate generates object array
+   * of the length of the longest attribute generator.
+   * All other attribute values circulate, for example:
+   * <pre>
+   *   var base = { name: 'Woody', age:2 }; 
+   *   var gen  = { name: list('Buzz', 'Slinky'), age: range(2,5) }; 
+   *   generate(gen, base) will return the array: 
+   *    [{ name: 'Buzz',   age: 2 },
+   *     { name: 'Slinky', age: 3 }, 
+   *     { name: 'Buzz',   age: 4 }, 
+   *     { name: 'Slinky', age: 5 }]
+   * </pre>
+   *
+   * @function {object[]} circulate
+   * @param {object} gen - the generator object.
+   * @param {object} base - the base test case object.
+   * @param {int} count - an optional result count
+   * @param {object} state - an optional state object that
+   *    can be read and manipulated by any generator.
+   * @param {function} result_transformer - an optional function
+   *   which takes the result generator object { result:r, state:s }
+   *   as argument and returns the desired result. If not defined, 
+   *   the default transformer returns just the result array. 
+   *   To return the result and state use 'id' function.
    */
   var circulate = lib.circulate = function(generator, base, count, state, result_transformer) {
     var s = state || {};
@@ -833,8 +862,22 @@ Popcorn.Core = function (utils) {
   };
 
   /**
-   * Generator that provides access to current
-   * generated object. It's experimental right now.
+   * 'current' provides access to current generated object. 
+   * It's experimental, use with care!!!
+   * For example:
+   * <pre>
+   *   var o = { name: 'Woody', age:2 };
+   *   var g = { name : list('Buzz', 'Woody'), 
+   *             description : current(function(r) { return r.name + ' is ' + r.age; }) }
+   *   permutate(g, o) will return 
+   *   [{ name:'Buzz', age:2, description: 'Buzz is 2' }, 
+   *    { name:'Woody', age:2, description: 'Woody is 2' }]
+   * </pre>
+   *
+   * @function {generator} current
+   * @param {function} f - a callback function that takes the current
+   *                       generated objects as parameter and returns
+   *                       this attribute value.
    */
   var current = lib.current = function(f) {
     return function(o, s) {
