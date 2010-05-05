@@ -10,6 +10,12 @@
 		<h3>Popcorn.Core - unit tests</h3>
 
 		<p>
+      <div><b>Tests run: <span id="tests_count"></span></b></div>
+      <div><b>Tests passed: <span id="tests_passed"></span></b></div>
+      <div><b>Tests failed: <span id="tests_failed"></span></b></div>
+    </p>
+
+		<p>
 		<div><b>Core lib</b></div>
         <script type="text/javascript">
           with(Popcorn.Core) {
@@ -38,9 +44,7 @@
                 age40 = age(gen(40));
             assertGen(mike, d, { name : "Mike" }, "property()");
             assertGen(update([mike, age40]), d, { name : "Mike", age : 40 }, "update()");
-            assertGen(mutate("name", [gen("Mike"), gen("John")]), d, 
-                [{ name : "Mike" }, { name : "John" }], 
-                "mutate()");
+            assertGen(mutate([gen("Mike"), gen("John")]), {}, ["Mike", "John"], "mutate()");
 
             var g = { name : mike, age : age40 };
             assert(permutate(g, d), 
@@ -78,18 +82,6 @@
             assert(r.state.var1, 'var1', 'withState()');
           }
 
-		</script>
-		</p>
-
-		<p>
-		<div><b>Cascading generator object</b></div>
-        <script type="text/javascript">
-          with(Popcorn.Core) {
-			  var d     = { name : { first : "John", last : 'Who' } };
-            assertGen(mutate("name", [gen({ first : gen('Fred') })]), d, 
-					[{ name : { first : "Fred", last : 'Who' } }], 
-                "mutate(cascading)");
-          }
 		</script>
 		</p>
 

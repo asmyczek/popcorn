@@ -1,15 +1,37 @@
 // A custom tiny unit test framework
 // requires 'core.js'
 
+// Stat handling
+var tests_count = 0;
+var tests_passed = 0;
+var tests_failed = 0;
+
 // Core lib reference
 var core = Popcorn.Core;
 
 // Basic assertion function just compares 
 // expect to result value
 var assert = function(expects, result, desc) {
+  // Update test counter
+  tests_count++;
+  document.getElementById('tests_count').innerHTML = tests_count;
+
+  // Run assert
   if (passed(expects, result, desc)) {
     write_passed(desc);
   } 
+
+  // Update result counters
+  var p = document.getElementById('tests_passed');
+  p.innerHTML = tests_passed;
+  if (tests_count == tests_passed) {
+    p.setAttribute('class', 'ok');
+  }
+  p = document.getElementById('tests_failed');
+  p.innerHTML = tests_failed;
+  if (tests_failed > 0) {
+    p.setAttribute('class', 'error');
+  }
 };
 
 // Expects result to be true
@@ -76,11 +98,13 @@ var passed = function(expects, result, desc) {
 
 // Writes test case passed massage
 var write_passed = function(desc) {
+  tests_passed++;
   document.writeln(desc + " - <span class='ok'>OK</span><br/>");
 };
 
 // Writes test failed message
 var write_failed = function(desc, msg) {
+  tests_failed++;
   document.writeln(desc + " - <span class='error'>" + msg + "</span><br/>");
 };
 
