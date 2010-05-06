@@ -33,13 +33,16 @@ Popcorn.Utils = function () {
    * @param {any[]} as - input array.
    */
   var map = lib.map = function(f, as) {
-    var ar = arrayOf(as), 
+    var ar = lib.arrayOf(as), 
         l  = as.length,
         r  = [];
-    for (var i = 0; i < l; i++) r[i] = f(ar[i]);
+    for (var i = 0; i < l; i++) {
+      r[i] = f(ar[i]);
+    }
     return r;
   };
 
+  var O = function() {};
   /**
    * Creates a new object with the argument objects as prototype.
    *
@@ -50,7 +53,6 @@ Popcorn.Utils = function () {
     O.prototype = o; 
     return new O();
   };
-  var O = function() {};
 
   /**
    * Merges argument objects together.
@@ -62,11 +64,13 @@ Popcorn.Utils = function () {
    * @param {object+} os - one ore more objects to merge.
    */
   var merge = lib.merge = function() {
-    var args = args2array(arguments), r = {}, arg;
+    var args = lib.args2array(arguments), r = {}, arg;
     for (var i = 0, l = args.length; i < l; i++) {
       arg = args[i];
-      for (name in arg) {
-        r[name] = arg[name];
+      for (var name in arg) {
+        if (arg.hasOwnProperty(name)) {
+          r[name] = arg[name];
+        }
       }
     }
     return r;
@@ -119,10 +123,10 @@ Popcorn.Utils = function () {
   var args2range = lib.args2range = function(args, min, max) {
     var a0 = min, a1 = max, as = args2array(args);
     switch(as.length) {
-      case 1 : a1 = intOf(as[0]);
+      case 1 : a1 = lib.intOf(as[0]);
                break;
-      case 2 : a0 = intOf(as[0]),
-               a1 = intOf(as[1]);
+      case 2 : a0 = lib.intOf(as[0]);
+               a1 = lib.intOf(as[1]);
                break;
     }
     return [Math.min(a0, a1), Math.max(a0, a1)];
@@ -140,12 +144,11 @@ Popcorn.Utils = function () {
    * @return a string representation of the type, for example 'null', 'array', 'data'.
    */
   var typeOf = lib.typeOf = function(inp) {
-    var undefined;
-    if (inp === null) return 'null';
-    if (inp === undefined) return 'undefined';
+    if (inp === null) { return 'null'; }
+    if (inp === undefined) { return 'undefined'; }
 
     var ot = typeof(inp);
-    if (ot !== 'object') return ot;
+    if (ot !== 'object') { return ot; }
     if ((typeof(inp.length) === 'number') &&
       !(inp.propertyIsEnumerable('length')) &&
       (typeof(inp.splice) === 'function')) {
@@ -200,7 +203,7 @@ Popcorn.Utils = function () {
    */
   var isInt = lib.isInt = function(inp) {
     try {
-      var i = numberOf(inp);
+      var i = lib.numberOf(inp);
       return Math.floor(i) === i;
     } catch(e) {
       return false;
@@ -411,13 +414,14 @@ Popcorn.Core = function (utils) {
    */
   var chain = lib.chain = function(g, f) {
     return function(o, s) {
+      var r, a;
       if (utils.isArray(g)) {
-        var r = seq(g, cConcat)(o, s);
+        r = lib.seq(g, lib.cConcat)(o, s);
         return f(r.result)(o, r.state);
       } else {
-        var r = g(o, s);
-            a = f(r.result);
-        return (utils.isArray(a))? seq(a, cConcat)(o, r.state) : a(o, r.state);
+        r = g(o, s);
+        a = f(r.result);
+        return (utils.isArray(a))? lib.seq(a, lib.cConcat)(o, r.state) : a(o, r.state);
       }
     };
   };
@@ -451,7 +455,7 @@ Popcorn.Core = function (utils) {
           ir = gs[i](o, ns);
           r = f(r, ir.result, i);
           ns = ir.state;
-        };
+        }
         return { result: r, state: ns };
       }
       return { result: o, state: s };
@@ -478,11 +482,11 @@ Popcorn.Core = function (utils) {
     var c  = Math.max(1, utils.intOf(n)),
         vs = [];
     if (utils.isArray(v)) {
-      while (c--) vs.push.apply(vs, v);
+      while (c--) { vs.push.apply(vs, v); }
     } else if (utils.isFunction(v)) {
-      while (c--) vs.push(v);
+      while (c--) { vs.push(v); }
     } else {
-      while (c--) vs.push(gen(v));
+      while (c--) { vs.push(gen(v)); }
     }
     return vs;
   };
@@ -508,7 +512,7 @@ Popcorn.Core = function (utils) {
     return function(n) {
       var c  = Math.max(1, utils.intOf(n)),
           gs = [];
-      for (var i = 0; i < c; i++) gs[i] = g;
+      for (var i = 0; i < c; i++) { gs[i] = g; }
       return seq(gs, f, init);
     };
   };
@@ -602,7 +606,7 @@ Popcorn.Core = function (utils) {
   var mutate = lib.mutate = function(gs) {
     return function(o, s) {
       if (gs.length > 0) {
-        var r = [], ns = s;
+        var r = [], ns = s, ogr;
         for(var i = 0, l = gs.length; i < l; i++) {
           var gr = gs[i](o, ns);
           ns = gr.state;
@@ -615,7 +619,7 @@ Popcorn.Core = function (utils) {
 
           // Mutate on a group generator
           } else if (utils.isObject(gr.result) && (gr.result._array_result === true)) {
-            var ogr = (utils.isArray(gr.result._generator))?
+            ogr = (utils.isArray(gr.result._generator))?
                   seq(gr.result._generator, cConcat)(o, ns) :
                   gr.result._generator(o, ns);
             ns = ogr.state;
@@ -625,7 +629,7 @@ Popcorn.Core = function (utils) {
           // TODO currently supported for permutation only
           } else if (utils.isObject(gr.result)) {
             if (MODE_PERMUTATE === ns._generation_mode) {
-              var ogr = permutate(gr.result, o, -1, ns, id);
+              ogr = lib.permutate(gr.result, o, -1, ns, id);
               ns = ogr.state;
               for (var k = 0, kl = ogr.result.length; k < kl; k++) {
                 r.push(ogr.result[k]);
@@ -638,7 +642,7 @@ Popcorn.Core = function (utils) {
           } else {
             r.push(gr.result);
           }
-        };
+        }
         return { result: r, state: ns };
       }
       return { result: [o], state: s };
@@ -733,11 +737,11 @@ Popcorn.Core = function (utils) {
    *   To return the result and state use 'id' function.
    */
   var permutate = lib.permutate = function(generator, base, count, state, result_transformer) {
-    var s = state || {};
-    var c = count || -1;
+    var st = state || {};
+    var c  = count || -1;
     var rt = result_transformer || function(r) { return r.result; };
     var gs = [], rs = [], r;
-    s._generation_mode = MODE_PERMUTATE;
+    st._generation_mode = MODE_PERMUTATE;
 
     // Recursive permutate helper applies 
     // generator 'g' on all objects 'os'.
@@ -746,7 +750,7 @@ Popcorn.Core = function (utils) {
       for (var i = 0, l = os.length; i < l; i++) {
         O.prototype = os[i];
         o = new O();
-        s._result_object = o;
+        ns._result_object = o;
         r = g(o, ns);
         ns = r.state;
         rs.push.apply(rs, r.result);
@@ -770,7 +774,9 @@ Popcorn.Core = function (utils) {
 
     // Generation
     for (var name in generator) {
-      gs.push(mutateOnAttribute(name, toGenArray(generator[name])));
+      if (generator.hasOwnProperty(name)) {
+        gs.push(mutateOnAttribute(name, toGenArray(generator[name])));
+      }
     }
 
     // TODO: move count logic into the permutate generator
@@ -778,9 +784,9 @@ Popcorn.Core = function (utils) {
     //      if n x run > count !!!
     var done = false;
     while(!done) {
-      r = perm_gen(base, s);
+      r = perm_gen(base, st);
       rs = rs.concat(r.result);
-      s = r.state;
+      st = r.state;
       if (c < 0) {
         done = true;
       } else if (rs.length > c) {
@@ -789,7 +795,7 @@ Popcorn.Core = function (utils) {
       }
     }
 
-    return rt({ result : rs, state : s });
+    return rt({ result : rs, state : st });
   };
 
   /**
@@ -830,14 +836,16 @@ Popcorn.Core = function (utils) {
     s._generation_mode = MODE_CIRCULATE;
     s._result_object = base;
 
-    var gs = {}, gr = {}, r, o, max = 0, rs = [];
+    var gs = {}, gr = {}, r, o, max = 0, rs = [], name;
 
     // Initialize
-    for (var name in generator) {
-      gs[name] = mutate(toGenArray(generator[name]));
-      r = gs[name](base[name], s);
-      if (r.result.length > max) max = r.result.length;
-      gr[name] = []; 
+    for (name in generator) {
+      if (generator.hasOwnProperty(name)) {
+        gs[name] = mutate(toGenArray(generator[name]));
+        r = gs[name](base[name], s);
+        if (r.result.length > max) { max = r.result.length; }
+        gr[name] = []; 
+      }
     }
 
     // Generate
@@ -847,16 +855,18 @@ Popcorn.Core = function (utils) {
       O.prototype = base;
       o = new O();
       s._result_object = o;
-      for (var name in generator) {
-        if (gr[name].length === 0) {
-          r = gs[name](base[name], s);
-          gr[name] = r.result; 
-          s = r.state;
+      for (name in generator) {
+        if (generator.hasOwnProperty(name)) {
+          if (gr[name].length === 0) {
+            r = gs[name](base[name], s);
+            gr[name] = r.result; 
+            s = r.state;
+          }
+          o[name] = gr[name].shift();
         }
-        o[name] = gr[name].shift();
-      };
+      }
       rs.push(o);
-    };
+    }
 
     return rt({ result : rs, state : s });
   };
@@ -1033,7 +1043,7 @@ Popcorn.Core = function (utils) {
      *
      * @object Popcorn.Core.Random
      */
-    var rand = utils.clone(RandomLib);
+    var rand = utils.clone(lib.RandomLib);
 
     /**
      * A random integer generator. 'int' is a rage function
@@ -1051,7 +1061,7 @@ Popcorn.Core = function (utils) {
      */
     rand.int = function() { 
       var mm = utils.args2range(arguments, 0, 1000); 
-      return lazy(function() { return gen(nextInt(mm[0], mm[1])); }); 
+      return lib.lazy(function() { return gen(nextInt(mm[0], mm[1])); }); 
     };
 
     /**
@@ -1064,7 +1074,7 @@ Popcorn.Core = function (utils) {
      */
     rand.element = function(as) { 
       if (as.length > 0) { 
-        return lazy(function() { return gen(as[nextInt(0, as.length)]); }); 
+        return lib.lazy(function() { return gen(as[nextInt(0, as.length)]); }); 
       } 
       throw "Empty array or string!"; 
     };

@@ -22,7 +22,7 @@ Popcorn.Common = function (core) {
    * Concats arguments (primitives single result generators)
    * into one string. 
    *
-   * @function {generator[string]} range
+   * @function {generator[string]} concat
    * @param {[generator/primitives]} value - single value
    * generators or primitives to concatenate. 
    */
@@ -61,7 +61,9 @@ Popcorn.Common = function (core) {
     var mm = core.args2range(arguments, 0, 100),
         l  = mm[1] - mm[0],
         r  = [];
-    for (var i = 0; i <= l; i++) r[i] = core.gen(mm[0] + i);
+    for (var i = 0; i <= l; i++) {
+      r[i] = core.gen(mm[0] + i);
+    }
     return r;
   };
 
@@ -105,17 +107,17 @@ Popcorn.Common = function (core) {
   var join = lib.join = function() {
     var args = core.args2array(arguments);
     return function(o, s) {
-      var rs = "", ns = s, r;
+      var rs = "", ns = s, gr, r;
       for (var i = 0, l = args.length; i < l; i++) {
-        var r = args[i];
+        r = args[i];
         switch(core.typeOf(r)) {
           case 'function' :
-            var gr = r(o, s);
+            gr = r(o, s);
             rs += gr.result;
             ns = gr.state;
             break;
           case 'array' :
-            var gr = join.apply(this, r)(o, s);
+            gr = join.apply(this, r)(o, s);
             rs += gr.result;
             ns = gr.state;
             break;
@@ -149,7 +151,7 @@ Popcorn.Common = function (core) {
             return core.chain(g, function(r) { return core.gen(h(r, pv)); })(pv, s); 
           default         : 
             return { result: h(g, pv), state: s };
-        };
+        }
       };
     };
   };
@@ -204,7 +206,9 @@ Popcorn.Common = function (core) {
           element = this.element(char_set);
       return core.lazy(function(o, s) {
         var l = int().result, r = "";
-        for (var i = 0; i < l; i++) r += element().result;
+        for (var i = 0; i < l; i++) {
+          r += element().result;
+        }
         return core.gen(r);
       });
     };
@@ -283,8 +287,8 @@ Popcorn.Common = function (core) {
    * Generates a random date
    *
    * @function {generator} date
-   * @prarm {milisec} from - from date 
-   * @prarm {milisec} to   - to date 
+   * @param {milisec} from - from date 
+   * @param {milisec} to   - to date 
    * @param {string} format - the output format, possible values are: date, hours, minutes, seconds, time, gmt.
    * By default data prints the local time string.
    *
@@ -292,7 +296,7 @@ Popcorn.Common = function (core) {
    */
   core.RandomLib.date = function(from, to, format) {
     var f = from || new Date(0),
-        t = to   || new Date(99999999999999);
+        t = to   || new Date(99999999999999),
         r = this;
     return core.lazy(function() { return lib.date(new Date(r.int(f.getTime(), t.getTime())().result), format); });
   };

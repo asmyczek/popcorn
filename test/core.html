@@ -46,7 +46,7 @@
             assertGen(update([mike, age40]), d, { name : "Mike", age : 40 }, "update()");
             assertGen(mutate([gen("Mike"), gen("John")]), {}, ["Mike", "John"], "mutate()");
 
-            var g = { name : mike, age : age40 };
+            var g = { name : gen("Mike"), age : gen(40) };
             assert(permutate(g, d), 
                 [{ name : "Mike", age : 40}], "permutate()");
           }

@@ -25,27 +25,31 @@ Popcorn.Network = function (core, common, dict, names) {
   // Parse and validate IP string to an int array,
   // for example "192.168.0.1" -> [192, 168, 0, 1]
   var parseIP = function(ip_str) {
-    var ip   = new RegExp("(\\d{1,3})\.(\\d{1,3})\.(\\d{1,3})\.(\\d{1,3})", "g").exec(ip_str),
+    var ip   = new RegExp("(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})", "g").exec(ip_str),
         pInt = function(seg) {
           var i = parseInt(seg, 10);
-          if (isNaN(i) || i > 255 || i < 0) throw "Invalid IP octet " + seg + " of IP: " + ip_str;
+          if (isNaN(i) || i > 255 || i < 0) { 
+            throw "Invalid IP octet " + seg + " of IP: " + ip_str;
+          }
           return i;
         };
     if (ip && ip.length > 4) {
       return core.map(pInt, ip.slice(1));
-    };
+    }
     throw "Invalid IP address: " + ip_str;
   };
 
   // Convert an IP array to a string
   var ip2str = function(ip) {
     return ip.join(".");
-  }
+  };
 
   // Convert an IP array to an int value.
   // Uses only last three octets.
   var ip2int = function(ip) {
-    if (ip.length > 3) throw "Max 3 IP octets supported."
+    if (ip.length > 3) {
+      throw "Max 3 IP octets supported.";
+    }
     var rip = ip.reverse();
     return core.seq(core.mapGen(rip.slice(1)), function(r, o, i) { return r + (o << (8 << i)); }, rip[0])().result;
   };
@@ -73,7 +77,9 @@ Popcorn.Network = function (core, common, dict, names) {
         ip2 = parseIP(toIP);
 
     // Validate range
-    if (ip1[0] !== ip2[0]) throw "Ip rage to large.";
+    if (ip1[0] !== ip2[0]) {
+      throw "Ip rage to large.";
+    }
 
     // Convert string to int array first and int using last three octets.
     var ipi1 = ip2int(ip1.slice(1)),
