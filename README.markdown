@@ -3,37 +3,35 @@ Popcorn - the JSON fuzzer
 
 ## Description
 
-Popcorn is a JavaScript embedded DSL designed for quick, easy and
-flexible JSON object generation. The core modules provides a basic set
-of generators for most common JavaScript types, and combinators to build
+Popcorn is a JavaScript embedded DSL designed for fast, easy and
+flexible JSON object generation. Popcorn core modules provides a basic set
+of generators for most common JavaScript types and combinators to build
 new generators for any kind of data. Additional modules extend the 
 functionality with random generators, dictionaries, network type
-generators for IP or mac address and more.
+generators for IP or mac addresses and more.
 
 Popcorn can be used to generate mock objects for testing of JSON services
-or browser side JavaScript code. Since using this DSL thousands of test cases
-can be expressed in just few lines of code, it makes for a great driver for
+or browser side JavaScript code. With Popcorn thousands of test cases
+can be expressed in just few lines of code which makes it a great driver for
 data driven test engines.
 
-For a quick overview
-see [Popcorn - Data Driven Testing with JSON](http://labs.mudynamics.com/2009/10/26/popcorn-data-driven-testing-with-json/)
-and try [popcorn maker](http://mu-labs.googlecode.com/svn/trunk/eng/tools/popcorn/popcorn_maker.html).
+You can give it a try at [popcorn maker](http://mu-labs.googlecode.com/svn/trunk/eng/tools/popcorn/popcorn_maker.html).
 
 ## Getting started
 
 The library consists of several independent loadable modules build on
-top of the Core framework. To setup the generator:
+top of the core framework. To setup the generator:
 
-  1. Load only the required modules or module All.
-  2. Define the base test case JSON object.
-  3. Define the generator object and assign generators to attributes you like to alter.
-  4. Run the `permutate` or `circulate` function on the generator and base object.
+  1. Load only required modules or module All.
+  2. Define base test case JSON object.
+  3. Define generator object and assign generators to attributes you intend to fuzz.
+  4. Run `permutate` or `circulate` function to generate test objects.
 
 For example:
 
 <pre><code>
 	// Load modules containing generators used in this scope.
-	with({ core: Popcorn.Core, comm: Popcorn.Common }) { 
+	with({ core: Popcorn.Core, comm: Popcorn.Common }) {
 
 		var base_object = { // Define the base test case object.
 			id   : 1, 
@@ -53,17 +51,15 @@ For example:
 ## Generators 101
 
 In the basics, generators are functions that take one argument value 
-and return a result value with an optional state. The Core module function
-`gen()` creates the most basic generator. It returns the value
-passed to `gen()` when executed. It can be sees as an generator
-constructor that wraps any value into a generator.
-
+and return a result value with an optional state. Core function
+`gen()` creates the most basic generator that substituts any input with
+the parameter value passed to `gen()`.
 <pre><code>
 	var g = gen('test'); // Create a generator g with value 'test'.
 	g('any input')       // Execute the generator g. The result is 'test'.
 </code></pre>
 
-In comparison with `gen()`, `prepend()` uses the input value:
+Another basic combinator is `prepend()`:
 
 <pre><code>
 	var p = prepend('Hello ');
@@ -82,8 +78,7 @@ result to the input value:
 </code></pre>
 
 Generator `chain()` can be used to execute generators in sequence.
-For example a generator for random user names of the form '<user>-<random int>'
-can be define as following:
+For example a random user name genarator can be implemented as following:
 
 <pre><code>
 	var r = random().int(),
@@ -96,7 +91,7 @@ the generator and passes the result to the function that returns a new generator
 as result. `chain()` always has to return another generator, so it can be 
 chained with another generator or just evaluated.
 
-The previous example seems to be quite useful already. We can extract it
+Random user name generator can be useful already. We can extract it
 into a separate library and use with any other generator, for example:
 
 <pre><code>
@@ -104,9 +99,7 @@ into a separate library and use with any other generator, for example:
 	repeat(10, randomUser)('user'); // Generates 10 random user names `user-xyz`.
 </code></pre>
 
-It is possible to define generators not only on root attributes of an object 
-but on attributes of inner objects as well (currently supported for `permutate()` only),
-for example:
+Popcors not only support permutations on first attribute level, but on object compositions (currently supported for `permutate()` only), for example:
 
 <pre><code>
 var generator = {
@@ -124,14 +117,14 @@ for more information and the complete generator list.
 
 ## Random generators
 
-The Core module defines a random generator object and a library class
-which can be extended with custom generators. The constructor function 
+Core module defines a random generator object and a library class
+which can be extended with custom generators. Constructor function 
 `random()` creates the random generator object. It accepts an optional
 seed value as argument.
-The random generator functions provided by the Core modules are:
+Build in random generator functions are:
 
-  - `int()` - range function that returns an integer in a defined rage.
-  - `element()` - picks one random element from the provided array or
+  - `int()` - range function that returns an integer in a predefined defined rage.
+  - `element()` - returns one element from the provided dictionary.
 
 For example:
 
@@ -160,23 +153,23 @@ See `Common.alpha` or `Network.emailAddress` for more details.
 ## Dictionaries
 
 Module Dictionary provides functions to build dictionaries
-from JavaScript arrays. The constructor function `dictionary()`
+from JavaScript arrays. Constructor function `dictionary()`
 takes an array as argument and returns the dictionary object.
-Currently three generator functions are supported by the dictionary 
-object:
+Currently three generator functions are supported by dictionary 
+objects:
 
   - `list()` - a range function which returns all or a subset of elements.
-  - `element()` - picks a random dictionary element.
-  - `elements()` - picks n random elements.
+  - `element()` - returns one random dictionary element.
+  - `elements()` - returns n random elements.
 
 Popcorn provides several default dictionaries for most common
 names, surnames, passwords, domains etc.
 
 ## State and variables
 
-The generation process maintains a state object which is accessible and
-modifiable by any generator. The `permutate()` and `circulate()` functions
-takes an optional state object as argument. If this is not provided,
+Generation process maintains a state object which is accessible by any generator.
+`permutate()` and `circulate()` functions
+take an optional state object as argument. If this is not provided,
 an empty object is created.
 
 To access the state use `withState()` generator, for example:
@@ -189,15 +182,14 @@ var generator = {
 </code></pre>
 
 The first generator sets an id attribute on the state object
-and returns a generator for this id. The state object id attribute
-is used in the second generator to create user names of the form 'user-1'. 
+and returns a generator for this id. Newly assigned id attribute
+of the state object is used by the second generator to create user names of the form 'user-id'. 
 Similar to `chain()` generator, `withState()` has to return another
 generator as result.
 
 To simplify access to the state object, Popcorn provides functions to 
-store generator results in variables and access this variables in other
-generators, `setVar()` and `withVar()`. Using these generators,
-the example above could be simplified to:
+store generator results in variables `setVar()` and access those with `withVar()`.
+Above example can be simplified to:
 
 <pre><code>
 var generator = {
